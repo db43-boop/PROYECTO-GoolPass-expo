@@ -1,0 +1,17 @@
+# =====================================================
+# GoolPass · Archivos que NO se suben a GitHub
+# =====================================================
+
+# Base de datos local (SQLite): datos propios de cada equipo/servidor.
+# Se regenera vacía automáticamente al cargar cualquier página (conexion.php).
+torneo.db
+
+# Archivos temporales del sistema
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# (Opcional) Si NO quieres subir los escudos subidos por los usuarios:
+# /uploads/*

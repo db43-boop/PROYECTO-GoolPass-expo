@@ -1,0 +1,128 @@
+/* =========================================================
+   ANIMACIONES · INTERRUPTOR GLOBAL (MODO LIGERO)
+   ---------------------------------------------------------
+   Cuando <html> (o <body>) lleva la clase `fx-sin-animacion`
+   se apagan animaciones, transiciones y desenfoques para
+   aligerar equipos de bajos recursos.
+
+   La clase la gestiona js/animaciones.js y la preferencia se
+   recuerda en localStorage ('torneo-animaciones').
+
+   Se carga AL FINAL de las hojas de estilo de cada pagina,
+   despues de los estilos que apaga.
+   ========================================================= */
+
+/* =========================================================
+   1. INTERRUPTOR
+   ========================================================= */
+
+html.fx-sin-animacion,
+html.fx-sin-animacion body,
+body.fx-sin-animacion { scroll-behavior: auto !important; }
+
+html.fx-sin-animacion *,
+html.fx-sin-animacion *::before,
+html.fx-sin-animacion *::after,
+body.fx-sin-animacion *,
+body.fx-sin-animacion *::before,
+body.fx-sin-animacion *::after {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Los desenfoques de fondo son lo mas caro para la GPU */
+html.fx-sin-animacion *,
+html.fx-sin-animacion *::before,
+html.fx-sin-animacion *::after,
+body.fx-sin-animacion *,
+body.fx-sin-animacion *::before,
+body.fx-sin-animacion *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Fondo decorativo: fuera auroras y halos (blur de 90px en movimiento) */
+html.fx-sin-animacion .aurora,
+body.fx-sin-animacion .aurora,
+html.fx-sin-animacion .halo,
+body.fx-sin-animacion .halo {
+    display: none !important;
+}
+
+/* Capas ornamentales de las fichas (particulas, halos y reflejos) */
+html.fx-sin-animacion .f-particulas,
+html.fx-sin-animacion .f-halo,
+html.fx-sin-animacion .f-reflejo,
+html.fx-sin-animacion .f-sheen,
+body.fx-sin-animacion .f-particulas,
+body.fx-sin-animacion .f-halo,
+body.fx-sin-animacion .f-reflejo,
+body.fx-sin-animacion .f-sheen {
+    display: none !important;
+}
+
+/* =========================================================
+   2. BOTON DE LA BARRA SUPERIOR
+   ========================================================= */
+
+.btn-anim {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--tenue, #9a9aae);
+    font-family: var(--fuente, 'Outfit', 'Segoe UI', system-ui, sans-serif);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: .22s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.btn-anim:hover,
+.btn-anim:focus-visible {
+    color: #fff;
+    background: var(--panel, rgba(255, 255, 255, .05));
+    border-color: var(--panel-borde, rgba(255, 255, 255, .10));
+    outline: none;
+}
+
+.btn-anim-ico { font-size: 15px; line-height: 1; }
+
+.btn-anim-estado {
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .9px;
+    background: rgba(53, 208, 127, .16);
+    color: #4ede9b;
+}
+
+/* Modo ligero activo: el boton queda encendido en dorado */
+.btn-anim[aria-pressed="true"] {
+    color: var(--dorado, #ffd24a);
+    border-color: rgba(255, 210, 74, .42);
+    background: rgba(255, 210, 74, .10);
+}
+
+.btn-anim[aria-pressed="true"] .btn-anim-estado {
+    background: rgba(255, 210, 74, .18);
+    color: var(--dorado, #ffd24a);
+}
+
+/* En pantallas pequenas sobra el texto; bastan icono y estado */
+@media (max-width: 620px) {
+    .btn-anim { padding: 9px 12px; }
+    .btn-anim-txt { display: none; }
+}
+
+@media print {
+    .btn-anim { display: none !important; }
+}

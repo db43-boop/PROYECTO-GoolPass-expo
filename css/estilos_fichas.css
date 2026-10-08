@@ -1,0 +1,527 @@
+/* ==========================================================================
+   TEMAS CULTURALES PARA FICHAS - Sistema de Torneos
+   Cada tema incluye: fondo, borde cultural, franja decorativa (::before)
+   y colores propios. Compatible con .card (listados) y .ficha-card (PDF).
+   ========================================================================== */
+
+/* Base común para que las franjas decorativas se posicionen bien */
+.card, .ficha-card { position: relative; overflow: hidden; }
+
+/* --- MÉXICO (Papel picado / Tricolor / Grecas aztecas) --- */
+.card.tema-mexico, .ficha-card.tema-mexico {
+    background: linear-gradient(180deg, #0a3d1f 0%, #051a0d 100%) !important;
+    border: 3px solid #c8102e !important;
+    box-shadow: 0 0 20px rgba(200, 16, 46, 0.4);
+}
+.card.tema-mexico::before, .ficha-card.tema-mexico::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #c8102e 0 14px, #ffffff 14px 28px, #006847 28px 42px);
+}
+.card.tema-mexico h3, .ficha-card.tema-mexico h1 { color: #ffd700 !important; text-shadow: 0 0 10px #006847; }
+.card.tema-mexico .detalles-box, .ficha-card.tema-mexico .seccion-datos {
+    background-color: #0d4a28; border-left: 4px solid #ffd700;
+}
+
+/* --- MOTHMAN / CRÍPTIDOS (Neblina nocturna de bosque / Ojos rojos) --- */
+.card.tema-mothman, .ficha-card.tema-mothman {
+    background: linear-gradient(180deg, #120e16 0%, #08050a 100%) !important;
+    border: 3px solid #ff1100 !important;
+    box-shadow: 0 0 25px rgba(255, 17, 0, 0.5);
+}
+.card.tema-mothman::before, .ficha-card.tema-mothman::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,17,0,.6) 18px 20px);
+}
+.card.tema-mothman h3, .ficha-card.tema-mothman h1 { color: #ff3333 !important; text-shadow: 0 0 12px #ff0000; }
+.card.tema-mothman .detalles-box, .ficha-card.tema-mothman .seccion-datos {
+    background-color: #1c1524; border-left: 4px solid #ff1100;
+}
+
+/* --- CUTE / KAWAII (Sakura / Corazones pasteles japoneses) --- */
+.card.tema-cute_kawaii, .ficha-card.tema-cute_kawaii {
+    background: linear-gradient(135deg, #2b1f33 0%, #17101f 100%) !important;
+    border: 3px solid #ff70a6 !important;
+    box-shadow: 0 0 20px rgba(255, 112, 166, 0.45);
+    border-radius: 18px;
+}
+.card.tema-cute_kawaii::before, .ficha-card.tema-cute_kawaii::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #ff70a6 0 12px, #ffd166 12px 24px, #a6e3ff 24px 36px);
+}
+.card.tema-cute_kawaii h3, .ficha-card.tema-cute_kawaii h1 { color: #ffd166 !important; text-shadow: 0 0 10px rgba(255, 209, 102, 0.8); }
+.card.tema-cute_kawaii .detalles-box, .ficha-card.tema-cute_kawaii .seccion-datos {
+    background-color: rgba(255, 255, 255, 0.08); border-left: 4px solid #ff70a6;
+}
+
+/* --- CARNÍVORO / CHARLIE THE STEAK (Parrilla / Rayas de carne) --- */
+.card.tema-carnivoro, .ficha-card.tema-carnivoro {
+    background: linear-gradient(180deg, #2a080c 0%, #120204 100%) !important;
+    border: 3px solid #e63946 !important;
+    box-shadow: 0 0 18px rgba(230, 57, 70, 0.55);
+}
+.card.tema-carnivoro::before, .ficha-card.tema-carnivoro::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #7a1a1a 0 22px, #4a0d0d 22px 30px, #e63946 30px 34px, #4a0d0d 34px 42px);
+}
+.card.tema-carnivoro h3, .ficha-card.tema-carnivoro h1 { color: #ff4d5a !important; text-shadow: 0 0 8px #900c3f; }
+.card.tema-carnivoro .detalles-box, .ficha-card.tema-carnivoro .seccion-datos {
+    background-color: #3b0d11; border-left: 4px solid #e63946;
+}
+
+/* --- IMPERIO ESPAÑOL (Borgoña / Cruz de San Andrés dorada) --- */
+.card.tema-imperio_espanol, .ficha-card.tema-imperio_espanol {
+    background: linear-gradient(135deg, #22080a 0%, #100304 100%) !important;
+    border: 3px double #c1121f !important;
+    box-shadow: 0 0 22px rgba(193, 18, 31, 0.5);
+}
+.card.tema-imperio_espanol::before, .ficha-card.tema-imperio_espanol::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(45deg,
+        #c1121f 0 12px, #f5e6c8 12px 14px, #c1121f 14px 26px, transparent 26px 38px);
+}
+.card.tema-imperio_espanol h3, .ficha-card.tema-imperio_espanol h1 { color: #fdf0d5 !important; text-shadow: 0 0 10px #c1121f; }
+.card.tema-imperio_espanol .detalles-box, .ficha-card.tema-imperio_espanol .seccion-datos {
+    background-color: #380e12; border-left: 4px solid #f5e6c8;
+}
+
+/* --- IMPERIO MONGOL (Fieltro de estepa / Nudos infinitos azul y ocre) --- */
+.card.tema-imperio_mongol, .ficha-card.tema-imperio_mongol {
+    background: linear-gradient(135deg, #022b3a 0%, #001524 100%) !important;
+    border: 3px solid #1f7a8c !important;
+    box-shadow: 0 0 20px rgba(31, 122, 140, 0.5);
+}
+.card.tema-imperio_mongol::before, .ficha-card.tema-imperio_mongol::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #1f7a8c 0 16px, #d9a441 16px 22px, #0d3b4c 22px 38px);
+}
+.card.tema-imperio_mongol h3, .ficha-card.tema-imperio_mongol h1 { color: #e1e5f2 !important; text-shadow: 0 0 8px #1f7a8c; }
+.card.tema-imperio_mongol .detalles-box, .ficha-card.tema-imperio_mongol .seccion-datos {
+    background-color: #0d3b4c; border-left: 4px solid #d9a441;
+}
+
+/* --- BRASIL (Verde-amarelo / Rombo de la bandera) --- */
+.card.tema-brasil, .ficha-card.tema-brasil {
+    background: linear-gradient(180deg, #062c19 0%, #02140a 100%) !important;
+    border: 3px solid #009c3b !important;
+    box-shadow: 0 0 18px rgba(255, 223, 0, 0.45);
+}
+.card.tema-brasil::before, .ficha-card.tema-brasil::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #009c3b 0 24px, #ffdf00 24px 30px, #002776 30px 54px);
+}
+.card.tema-brasil h3, .ficha-card.tema-brasil h1 { color: #ffdf00 !important; text-shadow: 0 0 10px rgba(0, 156, 59, 0.8); }
+.card.tema-brasil .detalles-box, .ficha-card.tema-brasil .seccion-datos {
+    background-color: #0c4226; border-left: 4px solid #ffdf00;
+}
+
+/* --- ISRAEL (Estrellas de David / Azul y blanco) --- */
+.card.tema-israel, .ficha-card.tema-israel {
+    background: linear-gradient(180deg, #031b33 0%, #010d1a 100%) !important;
+    border: 3px solid #0038b8 !important;
+    box-shadow: 0 0 20px rgba(0, 56, 184, 0.5);
+}
+.card.tema-israel::before, .ficha-card.tema-israel::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #ffffff 0 20px, #0038b8 20px 24px, #ffffff 24px 44px, #0038b8 44px 48px);
+}
+.card.tema-israel h3, .ficha-card.tema-israel h1 { color: #ffffff !important; text-shadow: 0 0 10px #0038b8; }
+.card.tema-israel .detalles-box, .ficha-card.tema-israel .seccion-datos {
+    background-color: #072a4e; border-left: 4px solid #ffffff;
+}
+
+/* --- TÍBET (Banderas de oración de cinco colores) --- */
+.card.tema-tibet, .ficha-card.tema-tibet {
+    background: linear-gradient(135deg, #331800 0%, #1a0c00 100%) !important;
+    border: 3px solid #ff6b00 !important;
+    box-shadow: 0 0 18px rgba(255, 107, 0, 0.4);
+}
+.card.tema-tibet::before, .ficha-card.tema-tibet::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #0033cc 0 10px, #ffffff 10px 20px, #ff3333 20px 30px, #009933 30px 40px, #ffcc00 40px 50px);
+}
+.card.tema-tibet h3, .ficha-card.tema-tibet h1 { color: #ffaa00 !important; text-shadow: 0 0 10px #ff6b00; }
+.card.tema-tibet .detalles-box, .ficha-card.tema-tibet .seccion-datos {
+    background-color: #4a2400; border-left: 4px solid #ffaa00;
+}
+
+/* --- IMPERIO ANIMAL (Pelaje / Rayas de sabana y huellas) --- */
+.card.tema-imperio_animal, .ficha-card.tema-imperio_animal {
+    background: linear-gradient(180deg, #1c1c12 0%, #0d0d08 100%) !important;
+    border: 3px solid #8a7322 !important;
+    box-shadow: 0 0 18px rgba(138, 115, 34, 0.4);
+}
+.card.tema-imperio_animal::before, .ficha-card.tema-imperio_animal::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #8a7322 0 18px, #d4b85c 18px 26px, #3d3112 26px 40px);
+}
+.card.tema-imperio_animal h3, .ficha-card.tema-imperio_animal h1 { color: #d4b85c !important; text-shadow: 0 0 8px rgba(212, 184, 92, 0.4); }
+.card.tema-imperio_animal .detalles-box, .ficha-card.tema-imperio_animal .seccion-datos {
+    background-color: #2b2b1e; border-left: 4px solid #8a7322;
+}
+
+
+/* 8. TIBET (Naranja / Místico Oriental) */
+.ficha-card.tema-tibet {
+    background: linear-gradient(135deg, #331800 0%, #1a0c00 100%);
+    border: 3px solid #ff6b00;
+    box-shadow: 0 0 18px rgba(255, 107, 0, 0.4);
+}
+.ficha-card.tema-tibet h1 {
+    color: #ffaa00;
+    text-shadow: 0 0 10px #ff6b00;
+}
+.ficha-card.tema-tibet .seccion-datos {
+    background-color: #4a2400;
+    border-left: 4px solid #ffaa00;
+}
+
+/* 9. IMPERIO ANIMAL (Bisonte, Camello, Cerdo, Daeodon) */
+.ficha-card.tema-imperio_animal {
+    background: linear-gradient(180deg, #1c1c12 0%, #0d0d08 100%);
+    border: 3px solid #8a7322;
+    box-shadow: 0 0 18px rgba(138, 115, 34, 0.35);
+}
+.ficha-card.tema-imperio_animal h1 {
+    color: #d4b85c;
+    text-shadow: 0 0 8px rgba(212, 184, 92, 0.4);
+}
+.ficha-card.tema-imperio_animal .seccion-datos {
+    background-color: #2b2b1e;
+    border-left: 4px solid #8a7322;
+}
+
+/* --- REINO TAIPING (Seda china / Dragón amarillo sobre rojo imperial) --- */
+.card.tema-taiping, .ficha-card.tema-taiping {
+    background: linear-gradient(135deg, #302000 0%, #170f00 100%) !important;
+    border: 3px solid #ffcc00 !important;
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+}
+.card.tema-taiping::before, .ficha-card.tema-taiping::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #ffcc00 0 8px, #a01818 8px 24px, #ffcc00 24px 26px, #a01818 26px 42px);
+}
+.card.tema-taiping h3, .ficha-card.tema-taiping h1 { color: #ff3333 !important; text-shadow: 0 0 10px #ffcc00; }
+.card.tema-taiping .detalles-box, .ficha-card.tema-taiping .seccion-datos {
+    background-color: #422d03; border-left: 4px solid #ff3333;
+}
+
+/* --- TROLLFACE / CREEPY (Glitch monocromático de meme raízo) --- */
+.card.tema-trollface, .ficha-card.tema-trollface {
+    background: linear-gradient(180deg, #141414 0%, #050505 100%) !important;
+    border: 3px solid #777777 !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+.card.tema-trollface::before, .ficha-card.tema-trollface::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #111111 0 10px, #333333 10px 20px, #111111 20px 30px, #555555 30px 32px);
+}
+.card.tema-trollface h3, .ficha-card.tema-trollface h1 { color: #ffffff !important; text-shadow: 0 0 6px #777777; }
+.card.tema-trollface .detalles-box, .ficha-card.tema-trollface .seccion-datos {
+    background-color: #222222; border-left: 4px solid #aaaaaa;
+}
+
+/* --- GAMER / FLASH (Pixeles de arcade Flash / HUD neón) --- */
+.card.tema-gamer_flash, .ficha-card.tema-gamer_flash {
+    background: linear-gradient(135deg, #0b1a2d 0%, #030a14 100%) !important;
+    border: 3px solid #00b4d8 !important;
+    box-shadow: 0 0 18px rgba(0, 180, 216, 0.4);
+}
+.card.tema-gamer_flash::before, .ficha-card.tema-gamer_flash::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #00b4d8 0 6px, transparent 6px 12px, #ffd60a 12px 18px, transparent 18px 30px);
+}
+.card.tema-gamer_flash h3, .ficha-card.tema-gamer_flash h1 { color: #90e0ef !important; text-shadow: 0 0 8px #00b4d8; }
+.card.tema-gamer_flash .detalles-box, .ficha-card.tema-gamer_flash .seccion-datos {
+    background-color: #12283f; border-left: 4px solid #00b4d8;
+}
+/* ==========================================================================
+   LOTE 2 — TEMAS CULTURALES (Países, Facciones, Imperios Animales, Memes)
+   ========================================================================== */
+
+/* --- COREA DEL NORTE (Bandera / Franjas roja-azul con blanco) --- */
+.card.tema-corea_norte, .ficha-card.tema-corea_norte {
+    background: linear-gradient(180deg, #1f0508 0%, #0a0102 100%) !important;
+    border: 3px solid #ed1c24 !important;
+    box-shadow: 0 0 20px rgba(237, 28, 36, 0.5);
+}
+.card.tema-corea_norte::before, .ficha-card.tema-corea_norte::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #ed1c24 0 18px, #ffffff 18px 22px, #002b7f 22px 40px, #ffffff 40px 44px);
+}
+.card.tema-corea_norte h3, .ficha-card.tema-corea_norte h1 { color: #ff4d4d !important; text-shadow: 0 0 10px #ed1c24; }
+.card.tema-corea_norte .detalles-box, .ficha-card.tema-corea_norte .seccion-datos {
+    background-color: #33080b; border-left: 4px solid #002b7f;
+}
+
+/* --- DINASTÍA QING (Porcelana imperial / Nubes y dragones amarillos) --- */
+.card.tema-qing, .ficha-card.tema-qing {
+    background: linear-gradient(135deg, #1c2b33 0%, #0a1216 100%) !important;
+    border: 3px solid #ffcc00 !important;
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.45);
+}
+.card.tema-qing::before, .ficha-card.tema-qing::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-radial-gradient(circle at 10px 0px,
+        #ffcc00 0 4px, #104f55 4px 12px, #ffcc00 12px 14px, #0a2a30 14px 26px);
+}
+.card.tema-qing h3, .ficha-card.tema-qing h1 { color: #ffe066 !important; text-shadow: 0 0 10px #ffcc00; }
+.card.tema-qing .detalles-box, .ficha-card.tema-qing .seccion-datos {
+    background-color: #12333a; border-left: 4px solid #104f55;
+}
+
+/* --- IMPERIO JAPONÉS (Seigaiha / Ondas del sol naciente) --- */
+.card.tema-imperio_japones, .ficha-card.tema-imperio_japones {
+    background: linear-gradient(180deg, #212121 0%, #0a0a0a 100%) !important;
+    border: 3px solid #bc002d !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+}
+.card.tema-imperio_japones::before, .ficha-card.tema-imperio_japones::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-radial-gradient(circle at 50% 200%,
+        #bc002d 0 3px, transparent 3px 14px, #ffffff 14px 16px, transparent 16px 28px);
+}
+.card.tema-imperio_japones h3, .ficha-card.tema-imperio_japones h1 { color: #ffffff !important; text-shadow: 0 0 10px #bc002d; }
+.card.tema-imperio_japones .detalles-box, .ficha-card.tema-imperio_japones .seccion-datos {
+    background-color: #2b1116; border-left: 4px solid #bc002d;
+}
+
+/* --- KUOMINTANG (Cielo azul / Sol blanco de doce rayos) --- */
+.card.tema-kuomintang, .ficha-card.tema-kuomintang {
+    background: linear-gradient(135deg, #021838 0%, #010a17 100%) !important;
+    border: 3px solid #0038a8 !important;
+    box-shadow: 0 0 18px rgba(0, 56, 168, 0.5);
+}
+.card.tema-kuomintang::before, .ficha-card.tema-kuomintang::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-conic-gradient(from 0deg at 50% 50%,
+        #ffffff 0deg 15deg, #0038a8 15deg 30deg);
+    background-size: 10px 10px;
+}
+.card.tema-kuomintang h3, .ficha-card.tema-kuomintang h1 { color: #4d88ff !important; text-shadow: 0 0 8px #0038a8; }
+.card.tema-kuomintang .detalles-box, .ficha-card.tema-kuomintang .seccion-datos {
+    background-color: #072554; border-left: 4px solid #fe0000;
+}
+
+/* --- ALEMANIA MILITAR (Feldgrau / Rayas diagonales de acero) --- */
+.card.tema-nazi_militar, .ficha-card.tema-nazi_militar {
+    background: linear-gradient(180deg, #1c0303 0%, #080000 100%) !important;
+    border: 3px solid #d00000 !important;
+    box-shadow: 0 0 22px rgba(208, 0, 0, 0.5);
+}
+.card.tema-nazi_militar::before, .ficha-card.tema-nazi_militar::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(45deg,
+        #2b2b2b 0 8px, #1a1a1a 8px 16px, #d00000 16px 18px, #1a1a1a 18px 34px);
+}
+.card.tema-nazi_militar h3, .ficha-card.tema-nazi_militar h1 { color: #ff3333 !important; text-shadow: 0 0 10px #000000; }
+.card.tema-nazi_militar .detalles-box, .ficha-card.tema-nazi_militar .seccion-datos {
+    background-color: #2e0808; border-left: 4px solid #ffffff;
+}
+
+/* --- CHINA COMUNISTA (Estrellas doradas sobre rojo estelar) --- */
+.card.tema-china_comunista, .ficha-card.tema-china_comunista {
+    background: linear-gradient(180deg, #2b0404 0%, #120101 100%) !important;
+    border: 3px solid #de2910 !important;
+    box-shadow: 0 0 20px rgba(222, 41, 16, 0.5);
+}
+.card.tema-china_comunista::before, .ficha-card.tema-china_comunista::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #de2910 0 30px, #ffde00 30px 34px, #de2910 34px 60px);
+}
+.card.tema-china_comunista h3, .ficha-card.tema-china_comunista h1 { color: #ffde00 !important; text-shadow: 0 0 10px #de2910; }
+.card.tema-china_comunista .detalles-box, .ficha-card.tema-china_comunista .seccion-datos {
+    background-color: #420808; border-left: 4px solid #ffde00;
+}
+
+/* --- USSR / SOVIÉTICO (Hoz y martillo / Rojo con hilo dorado) --- */
+.card.tema-ussr, .ficha-card.tema-ussr {
+    background: linear-gradient(135deg, #2e0000 0%, #120000 100%) !important;
+    border: 3px solid #cc0000 !important;
+    box-shadow: 0 0 20px rgba(204, 0, 0, 0.5);
+}
+.card.tema-ussr::before, .ficha-card.tema-ussr::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #cc0000 0 20px, #ffd700 20px 22px, #8b0000 22px 40px);
+}
+.card.tema-ussr h3, .ficha-card.tema-ussr h1 { color: #ffd700 !important; text-shadow: 0 0 10px #cc0000; }
+.card.tema-ussr .detalles-box, .ficha-card.tema-ussr .seccion-datos {
+    background-color: #420808; border-left: 4px solid #ffd700;
+}
+
+/* --- USA / ESTADOUNIDENSE (Barras y estrellas / Rojo, blanco y azul) --- */
+.card.tema-usa, .ficha-card.tema-usa {
+    background: linear-gradient(180deg, #031428 0%, #010812 100%) !important;
+    border: 3px solid #002868 !important;
+    box-shadow: 0 0 20px rgba(0, 40, 104, 0.6);
+}
+.card.tema-usa::before, .ficha-card.tema-usa::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #bf0a30 0 16px, #ffffff 16px 32px);
+}
+.card.tema-usa h3, .ficha-card.tema-usa h1 { color: #38b6ff !important; text-shadow: 0 0 8px #bf0a30; }
+.card.tema-usa .detalles-box, .ficha-card.tema-usa .seccion-datos {
+    background-color: #072346; border-left: 4px solid #bf0a30;
+}
+
+/* --- VIETNAM (Estrella amarilla / Rojo revolucionario) --- */
+.card.tema-vietnam, .ficha-card.tema-vietnam {
+    background: linear-gradient(180deg, #170303 0%, #080101 100%) !important;
+    border: 3px solid #da251d !important;
+    box-shadow: 0 0 18px rgba(218, 37, 29, 0.45);
+}
+.card.tema-vietnam::before, .ficha-card.tema-vietnam::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-radial-gradient(circle at 24px 0px,
+        #ffff00 0 4px, #da251d 4px 18px, #ffff00 18px 20px, #da251d 20px 48px);
+}
+.card.tema-vietnam h3, .ficha-card.tema-vietnam h1 { color: #ffff00 !important; text-shadow: 0 0 10px #da251d; }
+.card.tema-vietnam .detalles-box, .ficha-card.tema-vietnam .seccion-datos {
+    background-color: #2b0808; border-left: 4px solid #ffff00;
+}
+
+/* --- EMU EMPIRE (Outback australiano / Tierra ocre y plumas) --- */
+.card.tema-emu_empire, .ficha-card.tema-emu_empire {
+    background: linear-gradient(135deg, #190a28 0%, #090312 100%) !important;
+    border: 3px solid #7b2cbf !important;
+    box-shadow: 0 0 20px rgba(123, 44, 191, 0.5);
+}
+.card.tema-emu_empire::before, .ficha-card.tema-emu_empire::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #7b2cbf 0 14px, #ffb703 14px 20px, #2a1240 20px 40px);
+}
+.card.tema-emu_empire h3, .ficha-card.tema-emu_empire h1 { color: #e0aaff !important; text-shadow: 0 0 10px #7b2cbf; }
+.card.tema-emu_empire .detalles-box, .ficha-card.tema-emu_empire .seccion-datos {
+    background-color: #2a1240; border-left: 4px solid #ffb703;
+}
+
+/* --- DORO (Rosa neón meme / Glow cyber rosa) --- */
+.card.tema-doro, .ficha-card.tema-doro {
+    background: linear-gradient(135deg, #2b051a 0%, #12010a 100%) !important;
+    border: 3px solid #ff007f !important;
+    box-shadow: 0 0 22px rgba(255, 0, 127, 0.5);
+}
+.card.tema-doro::before, .ficha-card.tema-doro::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #ff007f 0 8px, #ff66c4 8px 12px, #420d2b 12px 28px);
+}
+.card.tema-doro h3, .ficha-card.tema-doro h1 { color: #ff66c4 !important; text-shadow: 0 0 10px #ff007f; }
+.card.tema-doro .detalles-box, .ficha-card.tema-doro .seccion-datos {
+    background-color: #420d2b; border-left: 4px solid #ff66c4;
+}
+
+/* --- GUGU GAGA (Cian ártico cute / Copos de hielo) --- */
+.card.tema-gugu_gaga, .ficha-card.tema-gugu_gaga {
+    background: linear-gradient(180deg, #031c24 0%, #010b0f 100%) !important;
+    border: 3px solid #00b4d8 !important;
+    box-shadow: 0 0 20px rgba(0, 180, 216, 0.5);
+}
+.card.tema-gugu_gaga::before, .ficha-card.tema-gugu_gaga::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-radial-gradient(circle at 14px 0px,
+        #90e0ef 0 3px, #00b4d8 3px 6px, #092e3b 6px 20px, #90e0ef 20px 22px, #092e3b 22px 40px);
+}
+.card.tema-gugu_gaga h3, .ficha-card.tema-gugu_gaga h1 { color: #90e0ef !important; text-shadow: 0 0 10px #00b4d8; }
+.card.tema-gugu_gaga .detalles-box, .ficha-card.tema-gugu_gaga .seccion-datos {
+    background-color: #092e3b; border-left: 4px solid #90e0ef;
+}
+
+
+/* --- DROG (Humo verde psicodélico / Neón narcocósmico) --- */
+.card.tema-drog, .ficha-card.tema-drog {
+    background: linear-gradient(160deg, #0d2b12 0%, #071a09 60%, #12071a 100%) !important;
+    border: 3px solid #39ff14 !important;
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.35);
+}
+.card.tema-drog::before, .ficha-card.tema-drog::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #39ff14 0 10px, #7dffb0 10px 14px, #0d2b12 14px 22px,
+        #b366ff 22px 32px, #0d2b12 32px 40px);
+}
+.card.tema-drog h3, .ficha-card.tema-drog h1 { color: #b366ff !important; text-shadow: 0 0 10px #39ff14; }
+.card.tema-drog .detalles-box, .ficha-card.tema-drog .seccion-datos {
+    background-color: #14361b; border-left: 4px solid #b366ff;
+}
+
+/* --- MAMBO (Caribe tropical / Fucsia y amarillo salsero) --- */
+.card.tema-mambo, .ficha-card.tema-mambo {
+    background: linear-gradient(135deg, #3d0a3d 0%, #1a031a 100%) !important;
+    border: 3px solid #ff3fbf !important;
+    box-shadow: 0 0 20px rgba(255, 63, 191, 0.4);
+}
+.card.tema-mambo::before, .ficha-card.tema-mambo::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #ff3fbf 0 12px, #ffd60a 12px 24px, #00e5c0 24px 30px, #ffd60a 30px 42px);
+}
+.card.tema-mambo h3, .ficha-card.tema-mambo h1 { color: #ffd60a !important; text-shadow: 0 0 10px #ff3fbf; }
+.card.tema-mambo .detalles-box, .ficha-card.tema-mambo .seccion-datos {
+    background-color: #4d114d; border-left: 4px solid #ffd60a;
+}
+
+/* --- TOM PEARL (Vaquero del oeste / Cuero, oro y polvo del desierto) --- */
+.card.tema-tom_pearl, .ficha-card.tema-tom_pearl {
+    background: linear-gradient(180deg, #3a250c 0%, #1c1206 100%) !important;
+    border: 3px solid #d9a441 !important;
+    box-shadow: 0 0 20px rgba(217, 164, 65, 0.35);
+}
+.card.tema-tom_pearl::before, .ficha-card.tema-tom_pearl::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #d9a441 0 8px, #7a4a1d 8px 20px, #d9a441 20px 24px,
+        #7a4a1d 24px 36px, #d9a441 36px 40px);
+}
+.card.tema-tom_pearl h3, .ficha-card.tema-tom_pearl h1 { color: #ffd27a !important; text-shadow: 0 0 10px #8a5a1d; }
+.card.tema-tom_pearl .detalles-box, .ficha-card.tema-tom_pearl .seccion-datos {
+    background-color: #452e10; border-left: 4px solid #d9a441;
+}
+
+/* --- DAEODON (Señor del abismo / Rojo sangre y obsidiana) --- */
+.card.tema-daeodon, .ficha-card.tema-daeodon {
+    background: linear-gradient(180deg, #280508 0%, #0e0103 100%) !important;
+    border: 3px solid #b3001b !important;
+    box-shadow: 0 0 25px rgba(179, 0, 27, 0.5);
+}
+.card.tema-daeodon::before, .ficha-card.tema-daeodon::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        #b3001b 0 14px, #1a0006 14px 22px, #ff2d2d 22px 26px, #1a0006 26px 34px);
+}
+.card.tema-daeodon h3, .ficha-card.tema-daeodon h1 { color: #ff4d4d !important; text-shadow: 0 0 12px #b3001b; }
+.card.tema-daeodon .detalles-box, .ficha-card.tema-daeodon .seccion-datos {
+    background-color: #380a10; border-left: 4px solid #ff2d2d;
+}
+
+/* --- ETC (Comodín genérico / Blanco y negro abstracto) --- */
+.card.tema-etc, .ficha-card.tema-etc {
+    background: linear-gradient(135deg, #262626 0%, #0f0f0f 100%) !important;
+    border: 3px solid #e0e0e0 !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+}
+.card.tema-etc::before, .ficha-card.tema-etc::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(45deg,
+        #e0e0e0 0 12px, #1a1a1a 12px 24px);
+}
+.card.tema-etc h3, .ficha-card.tema-etc h1 { color: #ffffff !important; text-shadow: 0 0 8px #e0e0e0; }
+.card.tema-etc .detalles-box, .ficha-card.tema-etc .seccion-datos {
+    background-color: #2e2e2e; border-left: 4px solid #e0e0e0;
+}
+

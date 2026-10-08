@@ -1,0 +1,500 @@
+/* ==========================================================================
+   FICHA · SISTEMA DE DISEÑO ÚNICO (GENERATIVO)
+   Motor: js/ficha_diseno.js  |  Animaciones: js/ficha_animaciones.js
+   --------------------------------------------------------------------------
+   El diseño de cada ficha se calcula de forma determinista a partir de la
+   identidad del participante (id + nombre + color + tema + semilla).
+   Este archivo solo traduce esas variables CSS a capas visuales.
+   Compatible con .card (listado) y .ficha-card (ficha individual / PDF).
+   ========================================================================== */
+
+/* ---------- 1. VARIABLES MAESTRAS ---------- */
+:root {
+    --fx-rapido: .25s cubic-bezier(.22,.61,.36,1);
+    --fx-medio: .6s cubic-bezier(.22,.61,.36,1);
+    --fx-lento: 1.2s cubic-bezier(.16,1,.3,1);
+
+    /* Rango de rareza -> glow */
+    --fx-r0: rgba(154,164,178,.55);
+    --fx-r1: rgba(74,222,128,.60);
+    --fx-r2: rgba(59,130,246,.65);
+    --fx-r3: rgba(168,85,247,.72);
+    --fx-r4: rgba(255,149,0,.85);
+}
+
+/* ---------- 2. BASE COMPARTIDA ---------- */
+.card[data-fx],
+.ficha-card[data-fx] {
+    --d-p1: #ff4500;
+    --d-p2: #ffb703;
+    --d-p3: #ffffff;
+    --d-ang: 145deg;
+    --d-pat-op: .10;
+    --fx-glow: var(--fx-r0);
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+/* Capa de textura generativa (::after libre: los temas culturales usan ::before) */
+.card[data-fx]::after,
+.ficha-card[data-fx]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: var(--d-pat-op);
+    mix-blend-mode: overlay;
+    background-repeat: repeat;
+    background-size: var(--d-pat-size, 22px) var(--d-pat-size, 22px);
+    background-position: var(--d-pat-x, 0px) var(--d-pat-y, 0px);
+    transition: opacity var(--fx-medio);
+}
+
+/* ---------- 3. PATRONES (data-pat="0..7") ---------- */
+[data-pat="0"]::after { /* Rayas diagonales */
+    background-image: repeating-linear-gradient(
+        var(--d-pat-ang, 45deg),
+        var(--d-p3) 0 2px, transparent 2px 9px);
+}
+[data-pat="1"]::after { /* Rejilla técnica */
+    background-image:
+        repeating-linear-gradient(0deg, var(--d-p3) 0 1px, transparent 1px 18px),
+        repeating-linear-gradient(90deg, var(--d-p3) 0 1px, transparent 1px 18px);
+}
+[data-pat="2"]::after { /* Puntos / polca */
+    background-image: radial-gradient(var(--d-p3) 1.6px, transparent 1.7px);
+}
+[data-pat="3"]::after { /* Chevron / galones */
+    background-image: repeating-linear-gradient(
+        var(--d-pat-ang, 135deg),
+        var(--d-p3) 0 3px, transparent 3px 12px),
+        repeating-linear-gradient(
+        calc(var(--d-pat-ang, 135deg) + 90deg),
+        var(--d-p3) 0 3px, transparent 3px 12px);
+    background-size: 16px 16px, 16px 16px;
+}
+[data-pat="4"]::after { /* Argamasa / counterdam */
+    background-image:
+        repeating-linear-gradient(45deg,  var(--d-p3) 0 1px, transparent 1px 11px),
+        repeating-linear-gradient(-45deg, var(--d-p3) 0 1px, transparent 1px 11px);
+}
+[data-pat="5"]::after { /* Escamas */
+    background-image: radial-gradient(circle at 50% 100%,
+        transparent 0 44%, var(--d-p3) 45% 52%, transparent 53%);
+    background-size: 20px 12px;
+}
+[data-pat="6"]::after { /* Hexágonos */
+    background-image:
+        repeating-linear-gradient(60deg,  var(--d-p3) 0 1px, transparent 1px 10px),
+        repeating-linear-gradient(-60deg, var(--d-p3) 0 1px, transparent 1px 10px),
+        repeating-linear-gradient(0deg,   var(--d-p3) 0 1px, transparent 1px 10px);
+}
+[data-pat="7"]::after { /* Ondas */
+    background-image: repeating-radial-gradient(circle at 50% 50%,
+        var(--d-p3) 0 1px, transparent 1px 14px);
+    background-size: 28px 28px;
+}
+
+/* ---------- 4. GEOMETRÍAS DEL MARCO (data-esq="0..6") ---------- */
+.f-marco {
+    position: absolute;
+    inset: 7px;
+    z-index: 3;
+    pointer-events: none;
+    border: 1px solid var(--d-p3);
+    opacity: .34;
+    transition: opacity var(--fx-medio), inset var(--fx-medio);
+}
+[data-esq="0"] .f-marco { border-radius: 16px; }
+[data-esq="1"] .f-marco { border-radius: 22px 6px 22px 6px; border-style: dashed; }
+[data-esq="2"] .f-marco { border-radius: 0; border-width: 2px;
+    clip-path: polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,
+                       100% calc(100% - 10px),calc(100% - 10px) 100%,
+                       10px 100%,0 calc(100% - 10px)); }
+[data-esq="3"] .f-marco { border-radius: 26px; border-style: double; border-width: 4px; }
+[data-esq="4"] .f-marco { border-radius: 0 0 26px 26px;
+    border-top: none; opacity: .28; }
+[data-esq="5"] .f-marco { border-radius: 4px; border-style: dotted; border-width: 3px; }
+[data-esq="6"] .f-marco { border-radius: 30px 4px 30px 4px;
+    border-left-width: 3px; border-right-width: 3px; }
+/* ---------- 5. ACENTOS / FRANJAS (data-acento="0..6") ---------- */
+/* ::before lo reservan los temas culturales, por eso el acento usa un hijo real */
+.f-accento {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    transition: transform var(--fx-lento), opacity var(--fx-medio);
+}
+[data-acento="0"] .f-accento {  /* Franja superior */
+    top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, var(--d-p1), var(--d-p2), var(--d-p3));
+}
+[data-acento="1"] .f-accento {  /* Franja inferior */
+    bottom: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(270deg, var(--d-p1), var(--d-p2), var(--d-p3));
+}
+[data-acento="2"] .f-accento {  /* Lateral izquierdo */
+    top: 0; bottom: 0; left: 0; width: 6px;
+    background: linear-gradient(180deg, var(--d-p1), var(--d-p2), var(--d-p3));
+}
+[data-acento="3"] .f-accento {  /* Lateral derecho */
+    top: 0; bottom: 0; right: 0; width: 6px;
+    background: linear-gradient(0deg, var(--d-p1), var(--d-p2), var(--d-p3));
+}
+[data-acento="4"] .f-accento {  /* Esquinas dobles */
+    top: 0; left: 0; right: 0; height: 14px;
+    background:
+        linear-gradient(var(--d-p1),var(--d-p1)) left/22px 14px no-repeat,
+        linear-gradient(var(--d-p2),var(--d-p2)) right/22px 14px no-repeat;
+}
+[data-acento="5"] .f-accento {  /* Diagonal superior */
+    top: -30%; left: -10%; right: -10%; height: 34%;
+    background: linear-gradient(90deg, transparent, var(--d-p1), transparent);
+    opacity: .28;
+    transform: rotate(-7deg);
+}
+[data-acento="6"] .f-accento {  /* Doble marco exterior */
+    top: 0; left: 0; right: 0; bottom: 0;
+    border: 2px solid var(--d-p1);
+    border-radius: inherit;
+    opacity: .55;
+}
+
+/* ---------- 6. RAREZA (data-rareza="0..4") ---------- */
+[data-rareza="1"] { --fx-glow: var(--fx-r1); }
+[data-rareza="2"] { --fx-glow: var(--fx-r2); }
+[data-rareza="3"] { --fx-glow: var(--fx-r3); }
+[data-rareza="4"] { --fx-glow: var(--fx-r4); }
+
+[data-rareza="2"] { box-shadow: 0 0 18px var(--fx-glow), 0 6px 18px rgba(0,0,0,.6) !important; }
+[data-rareza="3"] { box-shadow: 0 0 26px var(--fx-glow), 0 6px 18px rgba(0,0,0,.6) !important; }
+[data-rareza="4"] { box-shadow: 0 0 40px var(--fx-glow), 0 0 80px rgba(255,149,0,.25),
+                     0 6px 18px rgba(0,0,0,.6) !important; }
+
+/* Halo animado para épica y mítica */
+[data-rareza="3"] .f-halo,
+[data-rareza="4"] .f-halo {
+    position: absolute;
+    inset: -22%;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--fx-glow) 0%, transparent 62%);
+    opacity: .30;
+    filter: blur(22px);
+    animation: fx-halo 5.5s ease-in-out infinite alternate;
+}
+[data-rareza="4"] .f-halo {
+    opacity: .45;
+    background: conic-gradient(from 0deg, var(--fx-glow), transparent 45%, var(--fx-glow) 75%, transparent);
+    animation: fx-halo-spin 9s linear infinite;
+    filter: blur(30px);
+}
+@keyframes fx-halo      { from { transform: scale(.92); opacity:.18 } to { transform: scale(1.1); opacity:.42 } }
+@keyframes fx-halo-spin { to   { transform: rotate(360deg) scale(1.05) } }
+
+/* Partículas inline (mítica) */
+.f-particulas {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: inherit;
+}
+.f-particulas i {
+    position: absolute;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--d-p2);
+    box-shadow: 0 0 6px var(--fx-glow);
+    animation: fx-subir linear infinite;
+}
+@keyframes fx-subir {
+    from { transform: translateY(105%) scale(.4); opacity: 0 }
+    20%  { opacity: 1 }
+    to   { transform: translateY(-8%) scale(1.1); opacity: 0 }
+}
+
+/* ---------- 9. ANIMACIONES DE ENTRADA (escalonada) ---------- */
+.card[data-fx],
+.ficha-card[data-fx] {
+    opacity: 0;
+    transform: translateY(28px) scale(.94);
+    animation: fx-entrada .75s cubic-bezier(.16,1,.3,1) forwards;
+    animation-delay: var(--fx-delay, 0ms);
+}
+@keyframes fx-entrada {
+    0%   { opacity: 0; transform: translateY(28px) scale(.94) rotateX(-12deg); filter: blur(6px); }
+    60%  { opacity: 1; filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+}
+.fx-sin-animacion .card[data-fx],
+.fx-sin-animacion .ficha-card[data-fx] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+/* ---------- 10. SPOTLIGHT QUE SIGUE AL CURSOR ---------- */
+/* OJO: se usa un hijo real (.f-spot) y NO ::before porque los temas
+   culturales de estilos_fichas.css ya ocupan ::before en la tarjeta. */
+.card[data-fx] .f-spot,
+.ficha-card[data-fx] .f-spot {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .4s;
+    background: radial-gradient(280px circle at var(--fx-mx, 50%) var(--fx-my, 50%),
+        rgba(255,255,255,.20), transparent 62%);
+    mix-blend-mode: screen;
+}
+.card[data-fx].fx-hover .f-spot,
+.ficha-card[data-fx].fx-hover .f-spot { opacity: 1; }
+
+/* Barrido de brillo (sheen) */
+.card[data-fx] .f-sheen,
+.ficha-card[data-fx] .f-sheen {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(115deg,
+        transparent 32%, rgba(255,255,255,.30) 48%, transparent 62%);
+    transform: translateX(-130%);
+}
+.card[data-fx].fx-hover .f-sheen {
+    transform: translateX(130%);
+    transition: transform 1.05s cubic-bezier(.22,.61,.36,1);
+}
+
+/* ---------- 11. TILT 3D + LEVITACIÓN ---------- */
+.card[data-fx] { transition: transform .35s cubic-bezier(.22,.61,.36,1), box-shadow .35s; }
+.card[data-fx].fx-hover,
+.ficha-card[data-fx].fx-hover {
+    transform: perspective(1000px) rotateX(var(--fx-rx,0deg)) rotateY(var(--fx-ry,0deg))
+               translateY(-8px) scale(1.02);
+    z-index: 20;
+    transition: transform .18s ease-out, box-shadow .3s;
+}
+
+/* Reflejo inferior tipo cristal */
+.f-reflejo {
+    position: absolute;
+    left: 6%; right: 6%; bottom: -14px;
+    height: 26px;
+    z-index: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(ellipse, var(--fx-glow) 0%, transparent 70%);
+    opacity: 0;
+    filter: blur(10px);
+    transition: opacity .4s, transform .4s;
+    transform: scale(.8);
+}
+.card[data-fx].fx-hover .f-reflejo,
+.ficha-card[data-fx].fx-hover .f-reflejo { opacity: .55; transform: scale(1); }
+
+/* ---------- 12. REVELADO ESCALONADO DE DATOS ---------- */
+.card[data-fx] .detalles-box .linea-dato,
+.ficha-card[data-fx] .seccion-datos .dato-linea {
+    opacity: 0;
+    transform: translateX(-14px);
+    animation: fx-linea .5s ease forwards;
+    animation-delay: calc(var(--fx-delay, 0ms) + 260ms + var(--i, 0) * 65ms);
+}
+@keyframes fx-linea { to { opacity: 1; transform: translateX(0); } }
+.fx-sin-animacion .card[data-fx] .linea-dato,
+.fx-sin-animacion .ficha-card[data-fx] .dato-linea {
+    opacity: 1 !important; transform: none !important; animation: none !important;
+}
+
+/* ---------- 13. TÍTULO CON BRILLO PASANTE ---------- */
+.card[data-fx] h3,
+.ficha-card[data-fx] h1 {
+    position: relative;
+    background: linear-gradient(90deg,
+        var(--d-p2) 0%, var(--d-p3) 40%, var(--d-p1) 60%, var(--d-p2) 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fx-brillo-titulo 6s linear infinite;
+}
+@keyframes fx-brillo-titulo {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 250% 50%; }
+}
+/* ---------- 14. OVERLAY DE PRESENTACIÓN ---------- */
+.fx-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(4,4,8,.93);
+    backdrop-filter: blur(9px);
+    padding: 24px;
+    animation: fx-fade .32s ease;
+}
+.fx-overlay.fx-abierto { display: flex; }
+@keyframes fx-fade { from { opacity: 0 } to { opacity: 1 } }
+
+.fx-stage { perspective: 1600px; animation: fx-zoom .55s cubic-bezier(.16,1,.3,1); }
+@keyframes fx-zoom {
+    from { opacity: 0; transform: scale(.6) rotateY(140deg); }
+    to   { opacity: 1; transform: scale(1) rotateY(0); }
+}
+.fx-overlay .card[data-fx] {
+    width: 400px;
+    max-width: 92vw;
+    cursor: default !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+.fx-cerrar {
+    position: fixed;
+    top: 22px; right: 22px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 2px solid #ff4500;
+    background: rgba(0,0,0,.75);
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 100001;
+    transition: transform .25s, background .25s;
+}
+.fx-cerrar:hover { transform: rotate(90deg) scale(1.12); background: rgba(255,69,0,.35); }
+.fx-pista {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%);
+    color: #8a8a8a;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Confeti de raridad */
+.fx-confeti {
+    position: fixed;
+    width: 9px; height: 14px;
+    z-index: 100000;
+    pointer-events: none;
+    animation: fx-confeti-fall linear forwards;
+}
+@keyframes fx-confeti-fall {
+    from { transform: translateY(-8vh) rotate(0deg); opacity: 1 }
+    to   { transform: translateY(104vh) rotate(760deg); opacity: 0 }
+}
+
+/* ---------- 15. BOTONES FLOTANTES DE LA BARRA ---------- */
+.btn-fx {
+    position: fixed;
+    right: 20px; bottom: 20px;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border: 1px solid #444;
+    border-radius: 30px;
+    background: rgba(24,24,28,.94);
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(0,0,0,.65);
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+}
+.btn-fx:hover {
+    transform: translateY(-3px) scale(1.04);
+    border-color: #ff4500;
+    box-shadow: 0 9px 28px rgba(255,69,0,.42);
+}
+.btn-fx--sec { right: 20px; bottom: 68px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .card[data-fx], .ficha-card[data-fx],
+    .card[data-fx] .detalles-box .linea-dato,
+    .ficha-card[data-fx] .seccion-datos .dato-linea {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    .f-particulas, .f-halo { display: none !important; }
+}
+
+/* ---------- 16. IMPRESIÓN / PDF: estado limpio ---------- */
+@media print {
+    .btn-fx, .fx-overlay, .f-particulas, .f-halo, .f-reflejo, .f-sheen { display: none !important; }
+    .card[data-fx], .ficha-card[data-fx] {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+        box-shadow: none !important;
+    }
+    .card[data-fx] .linea-dato, .ficha-card[data-fx] .dato-linea {
+        opacity: 1 !important; transform: none !important; animation: none !important;
+    }
+}
+/* html2pdf serializa el nodo: se neutraliza cualquier estado transitorio */
+.pdf-limpio .card[data-fx], .pdf-limpio .ficha-card[data-fx] {
+    opacity: 1 !important; transform: none !important; animation: none !important;
+}
+.f-contador { font-variant-numeric: tabular-nums; }
+.f-sello {
+    position: absolute;
+    top: 10px; right: 10px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    pointer-events: none;
+    font-family: "Consolas", "Courier New", monospace;
+}
+.f-raridad {
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    color: #0b0b0b;
+    background: var(--fx-glow);
+    box-shadow: 0 2px 10px rgba(0,0,0,.5);
+    white-space: nowrap;
+}
+.f-codigo {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--d-p2);
+    opacity: .85;
+    text-shadow: 0 1px 3px #000;
+}
+
+/* ---------- 8. MONOGRAMA ---------- */
+.f-mono {
+    position: absolute;
+    z-index: 2;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--d-p3);
+    opacity: .07;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -2px;
+    font-family: Impact, "Arial Black", sans-serif;
+}
+[data-mono="0"] .f-mono { bottom: 4px; right: 8px;  font-size: 56px; }
+[data-mono="1"] .f-mono { top: 6px; left: 8px;     font-size: 42px; }
+[data-mono="2"] .f-mono { bottom: 50%; left: 50%; transform: translate(-50%,50%); font-size: 96px; opacity:.05; }
+[data-mono="3"] .f-mono { top: 50%; right: -6px;   transform: translateY(-50%) rotate(90deg); font-size: 48px; }
