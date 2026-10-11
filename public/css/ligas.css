@@ -1,0 +1,51 @@
+.goolpass-origen {
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:8px;
+}
+
+.goolpass-origen label {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    padding:12px 16px;
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:12px;
+    background:rgba(255,255,255,.04);
+    color:#f4f4f6;
+    font-size:14px;
+    font-weight:700;
+}
+
+.goolpass-origen label:has(input:checked) {
+    border-color:#ff9835;
+    background:rgba(255,125,36,.12);
+}
+
+.goolpass-origen input {
+    accent-color:#ff8932;
+    width:17px;
+    height:17px;
+}
+
+.liga-otra {
+    margin-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.liga-otra[hidden], #bloqueLigaNacional[hidden],#bloqueLigaInternacional[hidden] {
+    display:none!important;
+}
+
+.liga-otra label {
+    color:#ccc;
+    font-size:12px;
+}
+
+.liga-otra input {
+    width:100%;
+}

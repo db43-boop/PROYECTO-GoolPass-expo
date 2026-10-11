@@ -320,3 +320,53 @@ h2 .ico { font-size: 21px; }
 
 /* En la vista previa los botones de la ficha son decorativos */
 .preview-panel .acciones { opacity: .6; pointer-events: none; }
+
+/* Acciones de registro: reutilizan los botones oficiales de GoolPass. */
+.form-panel .acciones-formulario {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--panel-borde);
+}
+.form-panel .acciones-formulario .btn {
+    min-height: 48px;
+    min-width: 165px;
+    padding: 13px 22px;
+    border-radius: 999px;
+    font-family: var(--fuente);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+.form-panel .acciones-formulario .btn-guardar-equipo {
+    background: linear-gradient(135deg, var(--naranja), var(--naranja-2));
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(255, 69, 0, .32);
+}
+.form-panel .acciones-formulario .btn-guardar-equipo:hover {
+    box-shadow: 0 17px 38px rgba(255, 69, 0, .42);
+}
+.form-panel .acciones-formulario .btn-cancelar-equipo {
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.17);
+    color: var(--texto);
+    box-shadow: none;
+}
+.form-panel .acciones-formulario .btn-cancelar-equipo:hover {
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.32);
+}
+.form-panel .acciones-formulario .btn:focus-visible {
+    outline: 2px solid var(--dorado);
+    outline-offset: 4px;
+}
+@media (max-width: 540px) {
+    .form-panel .acciones-formulario { flex-direction: column; align-items: stretch; }
+    .form-panel .acciones-formulario .btn { width: 100%; }
+}

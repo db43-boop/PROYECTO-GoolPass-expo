@@ -1,5 +1,3 @@
 <?php
-require_once __DIR__ . '/auth.php';
-cerrar_sesion();
-header('Location: login.php?salida=1');
-exit;
+require_once __DIR__ . '/app/bootstrap.php';
+require GOOLPASS_ROOT . '/app/Controllers/actions/logout.php';

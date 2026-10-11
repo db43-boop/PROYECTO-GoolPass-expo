@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/conexion.php';
+// La conexión se crea una sola vez desde app/bootstrap.php.
 
 /** Devuelve el usuario de la sesión actual o null. */
 function usuario_actual(): ?array
@@ -45,7 +45,12 @@ function requerir_admin(): void
         exit;
     }
     if (!es_admin()) {
-        header('Location: index.php?denegado=1');
+        http_response_code(403);
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<!doctype html><html lang="es"><meta charset="utf-8"><title>Acceso denegado</title>'
+            . '<body style="font-family:Arial,sans-serif;max-width:650px;margin:80px auto;padding:20px">'
+            . '<h1>Acceso denegado</h1><p>Esta función está disponible únicamente para administradores.</p>'
+            . '<a href="index.php">Volver al inicio</a></body></html>';
         exit;
     }
 }
@@ -77,6 +82,29 @@ function cerrar_sesion(): void
     session_destroy();
 }
 
+/** Token CSRF asociado a la sesión para proteger formularios que modifican datos. */
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_input(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">';
+}
+
+function verificar_csrf(): void
+{
+    $enviado = $_POST['csrf_token'] ?? '';
+    if (!is_string($enviado) || !hash_equals(csrf_token(), $enviado)) {
+        http_response_code(403);
+        exit('Solicitud rechazada: formulario vencido o token CSRF inválido. Recarga la página e inténtalo nuevamente.');
+    }
+}
+
 /** Escapa texto para HTML de forma segura. */
 function e(?string $s): string
 {
@@ -87,7 +115,7 @@ function e(?string $s): string
  * Fragmento HTML para la barra de navegación: muestra el usuario
  * y su rol, con un botón para cerrar sesión.
  */
-function nav_usuario_html(): string
+function nav_usuario_html(string $paginaActiva = ''): string
 {
     if (!esta_logueado()) {
         return '<a href="login.php" class="nav-cta">Iniciar sesión</a>';
@@ -96,7 +124,13 @@ function nav_usuario_html(): string
     $rol = ($u['rol'] === 'admin')
         ? '<span class="rol-badge rol-admin">Admin</span>'
         : '<span class="rol-badge rol-usuario">Usuario</span>';
-    return '<a href="perfil.php" class="nav-usuario">'
+    $claseUsuarios = $paginaActiva === 'usuarios' ? ' class="activo" aria-current="page"' : '';
+    $claseMisEntradas = $paginaActiva === 'mis_entradas' ? ' class="activo" aria-current="page"' : '';
+    $clasePerfil = $paginaActiva === 'perfil' ? ' activo' : '';
+    $ariaPerfil = $paginaActiva === 'perfil' ? ' aria-current="page"' : '';
+    $administracion = es_admin() ? '<a href="usuarios.php"' . $claseUsuarios . '>Usuarios</a>' : '';
+    $misEntradas = !es_admin() ? '<a href="mis_entradas.php"' . $claseMisEntradas . '>Mis entradas</a>' : '';
+    return $administracion . $misEntradas . '<a href="perfil.php" class="nav-usuario' . $clasePerfil . '"' . $ariaPerfil . '>' 
         . '<span class="nav-usuario-nombre">' . e($u['nombre']) . '</span>' . $rol . '</a>'
         . '<a href="logout.php" class="nav-salir" title="Cerrar sesión">Salir</a>';
 }

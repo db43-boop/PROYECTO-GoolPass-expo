@@ -1,0 +1,5 @@
+Options -Indexes
+# Archivos privados, bases de datos y scripts no deben descargarse.
+<FilesMatch "(?i)\.(?:db|sqlite|sqlite3|env|ini|log|bak|backup)$">
+    Require all denied
+</FilesMatch>

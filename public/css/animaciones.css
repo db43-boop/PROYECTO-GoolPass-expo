@@ -126,3 +126,56 @@ body.fx-sin-animacion .f-sheen {
 @media print {
     .btn-anim { display: none !important; }
 }
+
+/* =========================================================
+   EFECTOS COMPARTIDOS · TODAS LAS SECCIONES
+   No se generan elementos nuevos; utilizamos el fondo y
+   las tarjetas que ya tiene cada módulo. El interruptor
+   ON/OFF existente gobierna cada animación y transición.
+   ========================================================= */
+@keyframes gp-entrada-suave {
+    from { opacity: .45; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes gp-luz-escudo {
+    0%,100% { box-shadow: 0 6px 18px rgba(255,69,0,.32); }
+    50% { box-shadow: 0 7px 28px rgba(255,110,32,.65), 0 0 20px rgba(255,210,74,.17); }
+}
+@keyframes gp-luz-tarjeta {
+    0%,100% { border-color: rgba(255,255,255,.12); }
+    50% { border-color: rgba(255,122,51,.27); }
+}
+
+html:not(.fx-sin-animacion) .goolpass-cabecera .marca-icono {
+    animation: gp-luz-escudo 4.5s ease-in-out infinite;
+}
+html:not(.fx-sin-animacion) :is(.ver-hero, .seccion-titulo, .titulo-entradas, .usuarios-hero, .hero-txt) {
+    animation: gp-entrada-suave .65s ease-out both;
+}
+html:not(.fx-sin-animacion) :is(.tarjeta-equipo, .card-partido, .ticket, .mini-stat, .panel-crear, .form-panel, .usuarios-panel, .mis-entradas-wrapper .panel) {
+    animation: gp-entrada-suave .55s ease-out both;
+}
+html:not(.fx-sin-animacion) :is(.tarjeta-equipo, .card-partido, .ticket, .mini-stat):nth-child(2n) {
+    animation-delay: .09s;
+}
+html:not(.fx-sin-animacion) :is(.tarjeta-equipo, .card-partido, .ticket, .mini-stat):nth-child(3n) {
+    animation-delay: .16s;
+}
+html:not(.fx-sin-animacion) :is(.card-partido, .ticket, .mini-stat, .usuarios-panel) {
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+html:not(.fx-sin-animacion) :is(.card-partido, .ticket, .mini-stat, .usuarios-panel):hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,122,51,.38);
+    box-shadow: 0 14px 30px rgba(0,0,0,.35);
+}
+/* Los fondos .aurora ya se animan desde app_common.css/portada.css.
+   En Equipos y Usuarios se reutiliza ahora el mismo fondo. */
+@media (prefers-reduced-motion: reduce) {
+    html:not(.fx-sin-animacion) :is(.goolpass-cabecera .marca-icono,
+        .ver-hero, .seccion-titulo, .titulo-entradas, .usuarios-hero, .hero-txt,
+        .tarjeta-equipo, .card-partido, .ticket, .mini-stat, .panel-crear,
+        .form-panel, .usuarios-panel, .mis-entradas-wrapper .panel) {
+        animation: none;
+    }
+}
