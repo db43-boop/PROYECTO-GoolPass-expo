@@ -1,5 +1,6 @@
 <?php
-require_once 'conexion.php';
+require_once 'auth.php';
+requerir_login();
 
 try {
     // Obtener equipos en lugar de participantes
@@ -18,7 +19,7 @@ $json_equipos = json_encode($equipos);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruleta &amp; Torneo - GoolPass</title>
+    <title>Torneo - GoolPass</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +30,7 @@ $json_equipos = json_encode($equipos);
     <link rel="stylesheet" href="css/animaciones.css">
 
     <script src="js/animaciones.js"></script>
+    <script src="js/antireload.js"></script>
 </head>
 <body>
 
@@ -54,46 +56,49 @@ $json_equipos = json_encode($equipos);
     <nav class="nav" aria-label="Navegación principal">
         <a href="index.php">Portada</a>
         <a href="ver.php">Equipos</a>
-        <a href="torneo.php" class="activo">Ruleta &amp; Torneo</a>
+        <a href="torneo.php" class="activo">Torneo</a>
         <button type="button" class="btn-anim" data-anim-toggle aria-pressed="false"
                 title="Desactivar animaciones (modo ligero)">
-            <span class="btn-anim-ico" aria-hidden="true">🎰</span>
+            <span class="btn-anim-ico" aria-hidden="true">✨</span>
             <span class="btn-anim-txt">Animaciones</span>
             <span class="btn-anim-estado" data-anim-estado>ON</span>
         </button>
         <a href="crear.php" class="nav-cta">+ Nuevo</a>
     </nav>
 </header>
+
 <main class="envoltura">
+
+    <div class="stepper">
+        <button type="button" id="tab-paso1" class="step activo" onclick="mostrarPaso(1)">
+            <span class="num">1</span> Sorteo de Grupos
+        </button>
+        <span class="step-flecha" aria-hidden="true"></span>
+        <button type="button" id="tab-paso2" class="step" onclick="mostrarPaso(2)">
+            <span class="num">2</span> Fase de Grupos
+        </button>
+        <span class="step-flecha" aria-hidden="true"></span>
+        <button type="button" id="tab-paso3" class="step" onclick="mostrarPaso(3)">
+            <span class="num">3</span> Eliminatorias
+        </button>
+    </div>
+
+    <!-- PASO 1 · CONFIGURACIÓN Y SORTEO -->
     <section id="paso1" class="paso-seccion activo">
+        <div class="config-box">
             <label for="numGrupos">¿Cuántos grupos habrá? (Grupo A · Z)</label>
             <select id="numGrupos" onchange="cambiarCantidadGrupos()"></select>
         </div>
 
-        <div class="ruleta-wrapper">
-            <h2 class="seccion-titulo">🎰 Ruleta de Sorteo</h2>
-            <p class="seccion-sub">Gira la ruleta para repartir a los equipos entre los grupos</p>
-
-            <div class="marco-ruleta">
-                <canvas id="canvas-ruleta" width="550" height="550"></canvas>
-            </div>
-
-            <div class="acciones-ruleta">
-                <button type="button" id="btnGirar" class="btn btn-primario" onclick="girarRuleta()">
-                    <span class="btn-ico" aria-hidden="true">💨</span><span>Girar Ruleta</span>
-                </button>
-                <button type="button" id="btnAuto" class="btn btn-azul" onclick="sorteoAutomatico()">
-                    <span class="btn-ico" aria-hidden="true">⚒</span><span>Sorteo Rápido</span>
-                </button>
-            </div>
-
-            <button type="button" id="btnIrAGrupos" class="btn btn-primario btn-ancho oculto"
-                    onclick="mostrarPaso(2)">
-                <span class="btn-ico" aria-hidden="true">😁</span><span>Ver Tablas de Grupos →</span>
+        <div class="centrado">
+            <button type="button" class="btn btn-primario" onclick="realizarSorteo()">
+                <span class="btn-ico" aria-hidden="true">🎲</span>
+                <span>Sortear y Ver Grupos →</span>
             </button>
         </div>
     </section>
 
+    <!-- PASO 2 · FASE DE GRUPOS -->
     <section id="paso2" class="paso-seccion">
         <h2 class="seccion-titulo">🏆 Clasificación por Grupos</h2>
         <p class="seccion-sub">
@@ -104,11 +109,13 @@ $json_equipos = json_encode($equipos);
 
         <div class="centrado">
             <button type="button" class="btn btn-primario" onclick="cargarClasificadosEnBracket()">
-                <span class="btn-ico" aria-hidden="true">✨</span><span>Cargar Clasificados a las Eliminatorias →</span>
+                <span class="btn-ico" aria-hidden="true">✨</span>
+                <span>Cargar Clasificados a las Eliminatorias →</span>
             </button>
         </div>
     </section>
 
+    <!-- PASO 3 · ELIMINATORIAS -->
     <section id="paso3" class="paso-seccion">
         <div class="bracket-wrapper">
             <h2 class="seccion-titulo">⚔️ Eliminatorias directas</h2>
@@ -121,21 +128,20 @@ $json_equipos = json_encode($equipos);
                 <div id="nombreCampeon"></div>
             </div>
         </div>
+
+        <div class="centrado">
+            <a href="ver.php" class="btn btn-fantasma">
+                <span class="btn-ico" aria-hidden="true">←</span>
+                <span>Volver a la lista</span>
+            </a>
+            <button type="button" class="btn btn-fantasma" onclick="reiniciarTorneo()">
+                <span class="btn-ico" aria-hidden="true">🌄</span>
+                <span>Reiniciar</span>
+            </button>
+        </div>
     </section>
 
 </main>
-
-<div class="cabecera">
-    <div>
-        <h1>Ruleta &amp; <span class="gradiente">Torneo</span></h1>
-        <p>Sortea los grupos con la ruleta, clasifica a los mejores de cada grupo
-           y define al campeón en las eliminatorias directas.</p>
-    </div>
-    <div class="cabecera-acciones">
-        <a href="ver.php" class="volver">← Volver a la lista</a>
-        <button type="button" class="btn btn-fantasma" onclick="reiniciarTorneo()">🌄 Reiniciar</button>
-    </div>
-</div>
 
 <script>
 const participantesOriginales = <?= $json_equipos ?>;
@@ -143,14 +149,12 @@ let participantesSorteo = [...participantesOriginales];
 let totalGrupos = 4;
 let grupos = [];
 let clasificadosFinales = [];
-let turnoGrupoIndex = 0;
-let girando = false;
 
 const letrasAbecedario = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
-// Utils de color
+// Color estable derivado del nombre del equipo
 function getColorClave(nombre) {
-    const hash = 0;
+    let hash = 0;
     for (let i = 0; i < nombre.length; i++) {
         const char = nombre.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
@@ -164,6 +168,14 @@ function getColorClave(nombre) {
         '#ff9800','#9c27b0','#00bcd4','#795548','#607d8b','#2196f3'
     ];
     return colores[Math.abs(hash) % colores.length];
+}
+
+function mezclar(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
 }
 
 function cargarOpcionesGrupos() {
@@ -184,6 +196,37 @@ function cargarOpcionesGrupos() {
     inicializarGrupos();
 }
 
+function inicializarGrupos() {
+    const select = document.getElementById('numGrupos');
+    totalGrupos = parseInt(select.value) || 4;
+    grupos = [];
+
+    for (let i = 0; i < totalGrupos; i++) {
+        grupos.push({
+            nombre: "Grupo " + letrasAbecedario[i],
+            participantes: []
+        });
+    }
+}
+
+function cambiarCantidadGrupos() {
+    participantesSorteo = [...participantesOriginales];
+    inicializarGrupos();
+    clasificadosFinales = [];
+    if (document.getElementById('paso2').classList.contains('activo')) {
+        renderizarTablasGrupos();
+    }
+}
+
+// Sortea (mezcla) los equipos y avanza a la fase de grupos
+function realizarSorteo() {
+    participantesSorteo = mezclar([...participantesOriginales]);
+    inicializarGrupos();
+    clasificadosFinales = [];
+    renderizarTablasGrupos();
+    mostrarPaso(2);
+}
+
 function mostrarPaso(num) {
     document.getElementById('paso1').classList.remove('activo');
     document.getElementById('paso2').classList.remove('activo');
@@ -198,93 +241,13 @@ function mostrarPaso(num) {
     if (num === 2) renderizarTablasGrupos();
 }
 
-function inicializarGrupos() {
-    const select = document.getElementById('numGrupos');
-    totalGrupos = parseInt(select.value) || 4;
-    grupos = [];
-
-    for (let i = 0; i < totalGrupos; i++) {
-        grupos.push({
-            nombre: "Grupo " + letrasAbecedario[i],
-            participantes: []
-        });
-    }
-
-function dibujarRuleta() {
-    const total = participantesSorteo.length;
-    if (!total) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const r = canvas.width / 2 - 18;
-    const sliceAngle = (2 * Math.PI) / total;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    let fontSize = 13;
-    if (total > 15) fontSize = 11;
-    if (total > 25) fontSize = 10;
-    if (total > 40) fontSize = 9;
-
-    for (let i = 0; i < total; i++) {
-        const startAngle = i * sliceAngle;
-        const endAngle = startAngle + sliceAngle;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, r, startAngle, endAngle);
-        ctx.closePath();
-
-        ctx.fillStyle = participantesSorteo[i].color || '#ff4500';
-        ctx.fill();
-        ctx.lineWidth = 1.5;
-
-function girarRuleta() {
-    if (girando || participantesSorteo.length === 0) return;
-    girando = true;
-    btnGirar.classList.add('rota');
-
-    const saltos = participantesSorteo.length <= 6 ? 8 + Math.floor(Math.random() * 12) :
-                   participantesSorteo.length <= 15 ? 10 + Math.floor(Math.random() * 16) :
-                   participantesSorteo.length <= 25 ? 14 + Math.floor(Math.random() * 20) : 20 + Math.floor(Math.random() * 25);
-
-    let rotacionTotal = 0;
-    for (let i = 0; i < saltos; i++) {
-        const step = 0.06 + Math.random() * 0.10;
-        rotacionTotal += step;
-        canvas.rotation = (canvas.rotation || 0) + step;
-        dibujarRuleta();
-        await sleep(35);
-    }
-
-    girando = false;
-    btnGirar.classList.remove('rota');
-
-    if (participantesSorteo.length > 0) {
-        const indiceFinal = Math.round(canvas.rotation / (2 * Math.PI) * participantesSorteo.length) % participantesSorteo.length;
-        const resultado = participantesSorteo[indiceFinal];
-        mostrarPopupSorteo(resultado);
-    }
-}
-
-function mostrarPopupSorteo(resultado) {
-    const fondo = document.createElement('div');
-    fondo.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:9999;';
-    const div = document.createElement('div');
-    div.style.cssText = 'background:#1e1e1e;padding:30px;border-radius:12px;text-align:center;max-width:500px;border:3px solid #FFD700;box-shadow:0 0 30px #FFD700;';
-
-    const span = document.createElement('span');
-    span.style.cssText = 'font-size:60px;margin-bottom:15px;';
-    span.textContent = '🎰';
-
-    const h2 = document.createElement('h2');
 
 function renderizarTablasGrupos() {
     const cont = document.getElementById('contenedorGrupos');
     cont.innerHTML = '';
 
     if (participantesSorteo.length === 0) {
-        cont.innerHTML = '<p style="color:#888;">No hay equipos para sortear.</p>';
+        cont.innerHTML = '<p class="vacio-grupo">No hay equipos para sortear.</p>';
         return;
     }
 
@@ -297,41 +260,87 @@ function renderizarTablasGrupos() {
         grupos.push({ nombre: "Grupo " + letrasAbecedario[g], participantes: [] });
     }
 
-    const aux = [...participantesSorteo];
-    for (let i = aux.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [aux[i], aux[j]] = [aux[j], aux[i]];
-    }
-
+    // Repartir los equipos (ya mezclados) entre los grupos
     for (let g = 0; g < totalGrupos; g++) {
         const grupoDiv = document.createElement('div');
-        grupoDiv.className = 'grupo-cartulina';
-        grupoDiv.style.borderColor = getColorClave(grupos[g].nombre) + '66';
+        grupoDiv.className = 'card-grupo';
+        grupoDiv.style.borderTopColor = getColorClave(grupos[g].nombre);
 
         const h3 = document.createElement('h3');
         h3.style.color = getColorClave(grupos[g].nombre);
-        h3.textContent = grupos[g].nombre;
+        h3.innerHTML = `${grupos[g].nombre} <span class="cuenta"></span>`;
         grupoDiv.appendChild(h3);
+
+        const inicio = idx;
+        const fin = Math.min(idx + porGrupo, total);
+
+        if (inicio >= fin) {
+            const p = document.createElement('p');
+            p.className = 'vacio-grupo';
+            p.textContent = 'Sin equipos';
+            grupoDiv.appendChild(p);
+            cont.appendChild(grupoDiv);
+            continue;
+        }
 
         const ul = document.createElement('ul');
         ul.style.listStyle = 'none';
-        ul.style.padding = 0;
-
-        const inicio = idx;
-        const fin = Math.min(idx + porGrupo, aux.length);
+        ul.style.padding = '0';
+        ul.style.margin = '0';
 
         for (let i = inicio; i < fin; i++) {
-            const lugar = document.createElement('li');
-            lugar.style.cssText = 'background:#252538;padding:10px 15px;border-radius:6px;margin-bottom:8px;';
+            const equipo = participantesSorteo[i];
+            grupos[g].participantes.push(equipo);
 
-            const spanNum = document.createElement('span');
-            spanNum.style.cssText = 'display:inline-block;width:25px;height:25px;border-radius:50%;background:#FFD700;color:#1e1e1e;font-weight:bold;text-align:center;line-height:25px;float:left;margin-right:10px;';
-            spanNum.textContent = (i + 1);
+            const lugar = document.createElement('li');
+            lugar.className = 'item-grupo';
+
+            const spanNom = document.createElement('span');
+            spanNom.className = 'nombre';
+
+            const badge = document.createElement('span');
+            badge.className = 'badge-color';
+            badge.style.background = getColorClave(equipo.nombre);
+
+            const txt = document.createElement('span');
+            txt.className = 'txt';
+            txt.textContent = `${equipo.nombre} (${equipo.liga})`;
+
+            spanNom.appendChild(badge);
+            spanNom.appendChild(txt);
+
+            const clasificado = clasificadosFinales.some(e => e.id === equipo.id);
+            const bot = document.createElement('button');
+            bot.type = 'button';
+            bot.className = 'btn-clasificar' + (clasificado ? ' clasificado' : '');
+            bot.textContent = clasificado ? 'Clasificado ✓' : 'Clasificar';
+            bot.onclick = () => clasificarEquipo(equipo);
+
+            lugar.appendChild(spanNom);
+            lugar.appendChild(bot);
+            ul.appendChild(lugar);
+            idx++;
+        }
+
+        grupoDiv.appendChild(ul);
+        cont.appendChild(grupoDiv);
+    }
+}
+
+function clasificarEquipo(equipo) {
+    const pos = clasificadosFinales.findIndex(e => e.id === equipo.id);
+    if (pos !== -1) {
+        clasificadosFinales.splice(pos, 1);
+    } else {
+        clasificadosFinales.push(equipo);
+    }
+    renderizarTablasGrupos();
+}
 
 
 function cargarClasificadosEnBracket() {
     if (clasificadosFinales.length < 4) {
-        alert('🚧 ¿No hay clasificados suficientes (mínimo 4).');
+        alert('🚧 No hay clasificados suficientes (mínimo 4).');
         return;
     }
 
@@ -373,15 +382,6 @@ function cargarClasificadosEnBracket() {
             const slotWrap = document.createElement('div');
             slotWrap.className = 'bracket-slot';
 
-
-// Inicializar al cargar
-cargarOpcionesGrupos();
-dibujarRuleta();
-
-// Expor el contexto para que las funciones en el scope global puedan acceder
-window._canvas = canvas;
-window._ctx = ctx;
-
             const matchup = document.createElement('div');
             matchup.className = 'matchup';
 
@@ -395,8 +395,9 @@ window._ctx = ctx;
             const slot1 = document.createElement('div');
             slot1.id = id1;
             if (rIdx === 0) {
-                const idx = clasificadosFinales[m * 2];
-                if (idx !== undefined) setSlotData(slot1, idx);
+                const eq = clasificadosFinales[m * 2];
+                if (eq !== undefined) setSlotData(slot1, eq);
+                else { slot1.className = 'slot vacio'; slot1.innerText = 'Pase Libre'; }
             } else {
                 slot1.className = 'slot vacio';
                 slot1.innerText = 'Pendiente';
@@ -406,8 +407,9 @@ window._ctx = ctx;
             const slot2 = document.createElement('div');
             slot2.id = id2;
             if (rIdx === 0) {
-                const idx = clasificadosFinales[m * 2 + 1];
-                if (idx !== undefined) setSlotData(slot2, idx);
+                const eq = clasificadosFinales[m * 2 + 1];
+                if (eq !== undefined) setSlotData(slot2, eq);
+                else { slot2.className = 'slot vacio'; slot2.innerText = 'Pase Libre'; }
             } else {
                 slot2.className = 'slot vacio';
                 slot2.innerText = 'Pendiente';
@@ -426,12 +428,13 @@ window._ctx = ctx;
     mostrarPaso(3);
 }
 
-function setSlotData(slotElem, idx) {
-    if (idx !== undefined && participantesSorteo[idx]) {
+function setSlotData(slotElem, equipo) {
+    if (equipo) {
+        const color = getColorClave(equipo.nombre);
         slotElem.className = 'slot';
-        slotElem.dataset.nombre = participantesSorteo[idx].nombre;
-        slotElem.dataset.color = getColorClave(participantesSorteo[idx].nombre);
-        slotElem.innerHTML = `<span><span class="badge-color" style="background:${slotElem.dataset.color}"></span>${participantesSorteo[idx].nombre} (${participantesSorteo[idx].liga})</span>`;
+        slotElem.dataset.nombre = equipo.nombre;
+        slotElem.dataset.color = color;
+        slotElem.innerHTML = `<span><span class="badge-color" style="background:${color}"></span>${equipo.nombre} (${equipo.liga})</span>`;
     } else {
         slotElem.className = 'slot vacio';
         slotElem.innerText = 'Pase Libre';
@@ -462,130 +465,17 @@ function avanzarDinamico(origenId, destinoId) {
 }
 
 function reiniciarTorneo() {
-    if (confirm('🚫 ¿Deseas reiniciar el torneo?')) {
-        if (confirm('🚩 ¿Estás seguro de eliminar todas las clasificaciones?')) {
+    if (confirm('¿Deseas reiniciar el torneo?')) {
+        if (confirm('¿Estás seguro de eliminar todas las clasificaciones?')) {
             location.reload();
         }
     }
 }
 
-            const spN = document.createElement('span');
-            spN.style.cssText = 'display:inline-block;';
-            spN.textContent = aux[i].nombre + ' (' + aux[i].liga + ')';
+// Inicializar al cargar
+cargarOpcionesGrupos();
+</script>
 
-            lugar.appendChild(spanNum);
-            lugar.appendChild(spN);
+</body>
+</html>
 
-            const bot = document.createElement('button');
-            bot.style.cssText = 'margin-top:6px;padding:4px 12px;background:#4CAF50;color:#fff;border:none;border-radius:4px;cursor:pointer;';
-            bot.textContent = 'Clasificar';
-            bot.onclick = (i2 = i) => clasificarEquipo(i2);
-
-            lugar.appendChild(bot);
-            ul.appendChild(lugar);
-            idx++;
-        }
-
-        grupoDiv.appendChild(ul);
-        cont.appendChild(grupoDiv);
-    }
-}
-
-function clasificarEquipo(idx) {
-    const equipo = participantesSorteo[idx];
-    if (!equipo) return;
-
-    const pos = clasificadosFinales.indexOf(idx);
-    if (pos !== -1) { alert('🚫 ¿El equipo ya está clasificado!'); return; }
-
-    clasificadosFinales.push(idx);
-    renderizarTablasGrupos();
-    cargarClasificadosEnBracket();
-}
-
-    h2.style.cssText = 'color:#FFD700;margin:0 0 10px 0;font-size:28px;';
-    h2.textContent = 'Equipos Sorteados!';
-
-    const sp = document.createElement('p');
-    sp.style.cssText = 'color:#fff;font-size:22px;margin:10px 0;';
-    sp.textContent = resultado.nombre + ' - ' + resultado.liga;
-
-    const btn = document.createElement('button');
-    btn.style.cssText = 'margin-top:20px;padding:10px 25px;background:#FFD700;color:#1e1e1e;border:none;border-radius:6px;font-weight:bold;cursor:pointer;';
-    btn.textContent = 'Aceptar';
-    btn.onclick = () => { fondo.remove(); };
-
-    div.appendChild(span); div.appendChild(h2); div.appendChild(sp); div.appendChild(btn);
-    fondo.appendChild(div);
-    document.body.appendChild(fondo);
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-        ctx.strokeStyle = '#1e1e1e';
-        ctx.stroke();
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(startAngle + sliceAngle / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${fontSize}px Arial`;
-        ctx.shadowColor = "black";
-        ctx.shadowBlur = 4;
-
-        const maxChar = total > 30 ? 15 : 20;
-        ctx.fillText(participantesSorteo[i].nombre.substring(0, maxChar), r - 15, 4);
-        ctx.restore();
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(cx - 15, 6);
-    ctx.lineTo(cx + 15, 6);
-    ctx.lineTo(cx, 32);
-    ctx.closePath();
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-}
-
-    turnoGrupoIndex = 0;
-}
-
-function cambiarCantidadGrupos() {
-    participantesSorteo = [...participantesOriginales];
-    inicializarGrupos();
-    dibujarRuleta();
-}
-
-function obtenerIndiceClave(nombre, total) {
-    let hash = 0;
-    for (let i = 0; i < nombre.length; i++) {
-        hash = ((hash << 5) - hash) + nombre.charCodeAt(i);
-        hash = hash & hash;
-    }
-    return Math.abs(hash) % total;
-}
-
-            <span aria-hidden="true">←</span> Volver a la lista
-        </a>
-        <button type="button" class="btn btn-fantasma" onclick="reiniciarTorneo()">
-            <span class="btn-ico" aria-hidden="true">🌄</span><span>Reiniciar</span>
-        </button>
-    </div>
-</div>
-
-<main class="envoltura">
-
-    <div class="stepper">
-        <button type="button" id="tab-paso1" class="step activo" onclick="mostrarPaso(1)">
-            <span class="num">1</span> Sorteo de Grupos
-        </button>
-        <span class="step-flecha" aria-hidden="true"></span>
-        <button type="button" id="tab-paso2" class="step" onclick="mostrarPaso(2)">
-            <span class="num">2</span> Fase de Grupos
-        </button>
-        <span class="step-flecha" aria-hidden="true"></span>
-        <button type="button" id="tab-paso3" class="step" onclick="mostrarPaso(3)">
-            <span class="num">3</span> Eliminatorias
-        </button>
-    </div>

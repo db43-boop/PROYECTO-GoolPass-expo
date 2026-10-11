@@ -468,3 +468,43 @@ input[type="file"]::file-selector-button {
 
 .nav .nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
+/* Usuario en la barra de navegación */
+.nav-usuario {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--panel-borde);
+    color: var(--texto);
+    font-size: 14px;
+    font-weight: 600;
+}
+.nav-usuario:hover { background: var(--panel-2); border-color: rgba(255,255,255,.22); }
+.nav-usuario-nombre { white-space: nowrap; }
+
+.nav-salir {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--panel-borde);
+    color: var(--tenue);
+    font-size: 13px;
+    font-weight: 600;
+    transition: .22s;
+}
+.nav-salir:hover { color: #fff; background: rgba(211,47,47,.25); border-color: rgba(211,47,47,.5); }
+
+/* Etiquetas de rol */
+.rol-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+.rol-admin { background: rgba(255,210,74,.18); color: var(--dorado); border: 1px solid rgba(255,210,74,.4); }
+.rol-usuario { background: rgba(66,165,255,.15); color: #90caf9; border: 1px solid rgba(66,165,255,.35); }
+

@@ -133,33 +133,6 @@ $color = '#2196F3';
             color: <?= $color ?>;
         }
 
-        .tabla-jugadores {
-            width: 100%;
-            border-collapse: collapse;
-            background: #1e1e1e;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .tabla-jugadores th,
-        .tabla-jugadores td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #333;
-        }
-
-        .tabla-jugadores th {
-            background: #2d2d44;
-            color: #aaa;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .tabla-jugadores tr:hover td {
-            background: #252538;
-        }
-
         .posicion-badge {
             display: inline-block;
             padding: 3px 8px;
@@ -273,6 +246,84 @@ $color = '#2196F3';
             z-index: 2000;
             font-size: 14px;
         }
+
+        /* ===== Plantilla en tarjetas con Logros ===== */
+        .jugadores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        .jugador-card {
+            background: #1e1e1e;
+            border: 2px solid #2a2a3e;
+            border-radius: 14px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+        .jugador-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--pos-color, #555);
+        }
+        .jugador-card:hover {
+            transform: translateY(-4px);
+            border-color: <?= $color ?>;
+            box-shadow: 0 10px 26px rgba(0,0,0,.45);
+        }
+        .jugador-card.pos-portero { --pos-color: #2196F3; }
+        .jugador-card.pos-defensas { --pos-color: #43a047; }
+        .jugador-card.pos-centrocampistas { --pos-color: #fb8c00; }
+        .jugador-card.pos-delanteros { --pos-color: #e53935; }
+        .jugador-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .jugador-avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 20px; color: #fff;
+            background: var(--pos-color, #555);
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,.35);
+        }
+        .jugador-datos { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .jugador-nombre {
+            font-weight: 700; font-size: 16px; color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .logros-titulo {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: #888; margin-bottom: 9px; font-weight: 700;
+        }
+        .logros-lista { display: flex; flex-wrap: wrap; gap: 7px; }
+        .logro {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 10px; border-radius: 999px; font-size: 12.5px;
+            background: #262638; color: #9a9aae; border: 1px solid #333;
+            opacity: .55; transition: .18s;
+        }
+        .logro b { font-weight: 800; font-size: 13px; }
+        .logro.on { opacity: 1; }
+        .logro-goles.on    { background: rgba(67,160,71,.16);  border-color: #43a047; color: #a5d6a7; }
+        .logro-asist.on    { background: rgba(33,150,243,.16); border-color: #2196F3; color: #90caf9; }
+        .logro-mvp.on      { background: rgba(255,193,7,.16);  border-color: #ffc107; color: #ffe082; }
+        .logro-amarilla.on { background: rgba(253,216,53,.14); border-color: #fdd835; color: #fff59d; }
+        .logro-roja.on     { background: rgba(229,57,53,.16);  border-color: #e53935; color: #ef9a9a; }
+        .btn-editar {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; margin-top: 16px;
+            padding: 10px 14px; border: none; border-radius: 9px;
+            background: #ff9800; color: #fff; font-weight: 700; font-size: 13.5px;
+            cursor: pointer; transition: background .18s;
+        }
+        .btn-editar:hover { background: #f57c00; }
     </style>
 </head>
 <body>
@@ -330,50 +381,56 @@ $color = '#2196F3';
             <button type="button" class="btn-guardar-jugador" onclick="abrirModalAgregar()">&#128194; Agregar primer jugador</button>
         </div>
     <?php else: ?>
-        <table class="tabla-jugadores">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Posición</th>
-                    <th>Goles</th>
-                    <th>Asistencias</th>
-                    <th>&#24163;/Roja</th>
-                    <th>MVP</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($jugadores as $idx => $j): ?>
-                <tr>
-                    <td style="font-weight:600;"><?= $idx + 1 ?></td>
-                    <td><?= htmlspecialchars($j['nombre']) ?></td>
-                    <td>
-                        <?php
-                        $posicion = $j['posicion'];
-                        $clase = match($posicion) {
-                            'Portero' => 'posicion-Portero',
-                            'Defensas' => 'posicion-Defensas',
-                            'Centrocampistas' => 'posicion-Centrocampistas',
-                            'Delanteros' => 'posicion-Delanteros',
-                            default => ''
-                        };
-                        ?>
+        <div class="jugadores-grid">
+            <?php foreach ($jugadores as $j):
+                $posicion = $j['posicion'];
+                $clase = match($posicion) {
+                    'Portero' => 'posicion-Portero',
+                    'Defensas' => 'posicion-Defensas',
+                    'Centrocampistas' => 'posicion-Centrocampistas',
+                    'Delanteros' => 'posicion-Delanteros',
+                    default => ''
+                };
+                $posTema = match($posicion) {
+                    'Portero' => 'pos-portero',
+                    'Defensas' => 'pos-defensas',
+                    'Centrocampistas' => 'pos-centrocampistas',
+                    'Delanteros' => 'pos-delanteros',
+                    default => 'pos-defensas'
+                };
+                $inicial = strtoupper(substr($j['nombre'], 0, 1));
+                $goles  = (int)$j['goles'];
+                $asis   = (int)$j['asistencias'];
+                $amar   = (int)$j['tarjetas_amarillas'];
+                $rojas  = (int)$j['tarjetas_rojas'];
+                $mvp    = (int)$j['mvp_count'];
+            ?>
+            <div class="jugador-card <?= $posTema ?>">
+                <div class="jugador-top">
+                    <div class="jugador-avatar"><?= htmlspecialchars($inicial) ?></div>
+                    <div class="jugador-datos">
+                        <span class="jugador-nombre"><?= htmlspecialchars($j['nombre']) ?></span>
                         <span class="posicion-badge <?= $clase ?>"><?= htmlspecialchars($posicion) ?></span>
-                    </td>
-                    <td><?= (int)$j['goles'] ?></td>
-                    <td><?= (int)$j['asistencias'] ?></td>
-                    <td><?= (int)$j['tarjetas_amarillas'] ?>/<?= (int)$j['tarjetas_rojas'] ?></td>
-                    <td><?= (int)$j['mvp_count'] ?></td>
-                    <td>
-                        <button type="button" class="btn-editar" onclick="abrirModalEditar(<?= $j['id'] ?>, '<?= addslashes(htmlspecialchars($j['nombre'])) ?>', '<?= addslashes(htmlspecialchars($j['posicion'])) ?>')">
-                            &#9998; Editar
-                        </button>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                    </div>
+                </div>
+
+                <div class="logros">
+                    <div class="logros-titulo">🏅 Logros</div>
+                    <div class="logros-lista">
+                        <span class="logro logro-goles <?= $goles > 0 ? 'on' : '' ?>" title="Goles anotados">⚽ <b><?= $goles ?></b></span>
+                        <span class="logro logro-asist <?= $asis > 0 ? 'on' : '' ?>" title="Asistencias">🎯 <b><?= $asis ?></b></span>
+                        <span class="logro logro-mvp <?= $mvp > 0 ? 'on' : '' ?>" title="Veces MVP (trofeos)">🏆 <b><?= $mvp ?></b></span>
+                        <span class="logro logro-amarilla <?= $amar > 0 ? 'on' : '' ?>" title="Tarjetas amarillas">🟨 <b><?= $amar ?></b></span>
+                        <span class="logro logro-roja <?= $rojas > 0 ? 'on' : '' ?>" title="Tarjetas rojas">🟥 <b><?= $rojas ?></b></span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-editar" onclick="abrirModalEditar(<?= (int)$j['id'] ?>, '<?= addslashes(htmlspecialchars($j['nombre'])) ?>', '<?= addslashes(htmlspecialchars($posicion)) ?>', <?= $goles ?>, <?= $asis ?>, <?= $amar ?>, <?= $rojas ?>, <?= $mvp ?>)">
+                    ✎ Editar
+                </button>
+            </div>
+            <?php endforeach; ?>
+        </div>
     <?php endif; ?>
 
     <div style="margin-top:15px;text-align:center;">
@@ -461,16 +518,16 @@ $color = '#2196F3';
     }
 
     // Abre el modal de editar
-    function abrirModalEditar(id, nombre, posicion) {
+    function abrirModalEditar(id, nombre, posicion, goles, asistencias, amarillas, rojas, mvp) {
         document.getElementById('modalEditar').style.display = 'block';
         document.getElementById('input_id_jugador').value = id;
         document.getElementById('input_nombre_editar').value = nombre;
         document.getElementById('input_posicion_editar').value = posicion;
-        document.getElementById('input_goles_editar').value = 0;
-        document.getElementById('input_asistencias_editar').value = 0;
-        document.getElementById('input_amarillas_editar').value = 0;
-        document.getElementById('input_rojas_editar').value = 0;
-        document.getElementById('input_mvp_editar').value = 0;
+        document.getElementById('input_goles_editar').value = goles || 0;
+        document.getElementById('input_asistencias_editar').value = asistencias || 0;
+        document.getElementById('input_amarillas_editar').value = amarillas || 0;
+        document.getElementById('input_rojas_editar').value = rojas || 0;
+        document.getElementById('input_mvp_editar').value = mvp || 0;
     }
 
     function cerrarModal(id) {

@@ -1,5 +1,6 @@
 <?php
-require_once 'conexion.php';
+require_once 'auth.php';
+requerir_login();
 
 // Habilitar reporte de errores
 $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -127,37 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['accion_editar'])) {
     }
 }
 
-// Crear nuevo partido (panel «Crear partido nuevo» de esta página)
+// (La creación de partidos se gestiona ahora en partidos.php, solo para admin)
 $error = '';
-$abrir_crear = false;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['accion']) && $_POST['accion'] === 'crear_partido') {
-    $abrir_crear = true;
-    $local = (int)($_POST['equipo_local_id'] ?? 0);
-    $visitante = (int)($_POST['equipo_visitante_id'] ?? 0);
-    $fecha = trim($_POST['fecha_hora'] ?? '');
-    $estadio = trim($_POST['estadio'] ?? '');
-    $precio = (float)($_POST['precio_entrada'] ?? 0);
-
-    if ($local <= 0 || $visitante <= 0) {
-        $error = 'Elige los dos equipos del partido.';
-    } elseif ($local === $visitante) {
-        $error = 'El equipo local y el visitante no pueden ser el mismo.';
-    } elseif ($fecha === '' || $estadio === '') {
-        $error = 'Completa la fecha y el estadio del partido.';
-    } elseif ($precio < 0) {
-        $error = 'El precio no puede ser negativo.';
-    } else {
-        try {
-            $stmt = $conexion->prepare("INSERT INTO partidos (equipo_local_id, equipo_visitante_id, fecha_hora, estadio, precio_entrada) VALUES (:local, :visitante, :fecha, :estadio, :precio)");
-            $stmt->execute([':local' => $local, ':visitante' => $visitante, ':fecha' => $fecha, ':estadio' => $estadio, ':precio' => $precio]);
-            header("Location: ver.php?mensaje=" . urlencode("Partido creado correctamente."));
-            exit;
-        } catch (PDOException $e) {
-            $error = 'Error al crear el partido: ' . $e->getMessage();
-        }
-    }
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -175,6 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['accion']) && $_POST[
     <link rel="stylesheet" href="css/animaciones.css">
 
     <script src="js/animaciones.js"></script>
+    <script src="js/antireload.js"></script>
     <style>
         .ver-wrap { max-width: 1280px; margin: 0 auto; padding: 0 28px 70px; }
         .ver-hero { text-align:center; padding: 34px 0 6px; }
@@ -283,9 +256,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['accion']) && $_POST[
     <a class="ver-marca" href="index.php"><span class="ver-marca-ico">🏆</span><span>Gool<em>Pass</em></span></a>
     <nav class="ver-nav">
         <a href="ver.php" class="activo">Equipos</a>
-        <a href="torneo.php">Ruleta</a>
+        <a href="torneo.php">Torneo</a>
         <a href="partidos.php">Partidos</a>
-        <a href="crear.php" class="cta">+ Nuevo</a>
+        <?= nav_usuario_html() ?>
     </nav>
 </header>
 
@@ -359,42 +332,10 @@ foreach ($equipos as $x) { $totalJug += (int)$x['total_jugadores']; $totalGoles 
         <div class="alerta-error">❌ <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <details class="panel-crear" <?= $abrir_crear ? 'open' : '' ?>>
-        <summary>➕ Crear partido nuevo</summary>
-        <form method="post" style="margin-top:6px;">
-            <input type="hidden" name="accion" value="crear_partido">
-            <div class="form-grid">
-                <label>Equipo local
-                    <select name="equipo_local_id" required>
-                        <option value="">Seleccionar…</option>
-                        <?php foreach ($equipos as $eq): ?>
-                            <option value="<?= (int)$eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['liga']) ?>)</option>
-                        <?php endforeach; ?>
-                    </select>
-                </label>
-                <label>Equipo visitante
-                    <select name="equipo_visitante_id" required>
-                        <option value="">Seleccionar…</option>
-                        <?php foreach ($equipos as $eq): ?>
-                            <option value="<?= (int)$eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['liga']) ?>)</option>
-                        <?php endforeach; ?>
-                    </select>
-                </label>
-                <label>Fecha y hora
-                    <input type="datetime-local" name="fecha_hora" required>
-                </label>
-                <label>Estadio
-                    <input type="text" name="estadio" placeholder="Ej. Estadio Central" required>
-                </label>
-                <label>Precio de entrada
-                    <input type="number" name="precio_entrada" min="0" step="0.01" placeholder="Ej. 25.00" required>
-                </label>
-            </div>
-            <div style="margin-top:14px;">
-                <button type="submit" class="btn btn-primario"><span class="btn-ico">💾</span><span>Guardar partido</span></button>
-            </div>
-        </form>
-    </details>
+    <div class="panel-crear" style="margin-top:6px;">
+        <p style="margin:0;color:var(--tenue);">🛡️ Como administrador puedes
+            <a href="partidos.php" style="color:var(--dorado);font-weight:700;">crear partidos aquí</a>.</p>
+    </div>
 </div>
 
 <div id="sinResultados" style="display:none;" class="tarjeta-vacia">Sin resultados para esa b&uacute;squeda.</div>

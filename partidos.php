@@ -1,8 +1,47 @@
 <?php
-require_once 'conexion.php';
+require_once 'auth.php';
+requerir_login();
 
+$esAdmin = es_admin();
 $mensaje = '';
 $error = '';
+
+// Crear partido (solo administradores)
+if ($esAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['accion']) && $_POST['accion'] === 'crear_partido') {
+    $local = (int)($_POST['equipo_local_id'] ?? 0);
+    $visitante = (int)($_POST['equipo_visitante_id'] ?? 0);
+    $fecha = trim($_POST['fecha_hora'] ?? '');
+    $estadio = trim($_POST['estadio'] ?? '');
+    $precio = (float)($_POST['precio_entrada'] ?? 0);
+
+    if ($local <= 0 || $visitante <= 0) {
+        $error = 'Elige los dos equipos del partido.';
+    } elseif ($local === $visitante) {
+        $error = 'El equipo local y el visitante no pueden ser el mismo.';
+    } elseif ($fecha === '' || $estadio === '') {
+        $error = 'Completa la fecha y el estadio del partido.';
+    } elseif ($precio < 0) {
+        $error = 'El precio no puede ser negativo.';
+    } else {
+        try {
+            $stmt = $conexion->prepare("INSERT INTO partidos (equipo_local_id, equipo_visitante_id, fecha_hora, estadio, precio_entrada) VALUES (:local, :visitante, :fecha, :estadio, :precio)");
+            $stmt->execute([':local' => $local, ':visitante' => $visitante, ':fecha' => $fecha, ':estadio' => $estadio, ':precio' => $precio]);
+            $mensaje = 'Partido creado correctamente.';
+        } catch (PDOException $e) {
+            $error = 'Error al crear el partido: ' . $e->getMessage();
+        }
+    }
+}
+
+// Equipos disponibles (para el formulario de creación del admin)
+$equipos = [];
+if ($esAdmin) {
+    try {
+        $equipos = $conexion->query("SELECT id, nombre, liga FROM equipos ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $equipos = [];
+    }
+}
 
 // Simular pago de entrada
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['accion']) && $_POST['accion'] === 'pagar_entrada') {
@@ -19,8 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['accion']) && $_POST[
     } else {
         try {
             $codigo = 'QR-' . strtoupper(bin2hex(random_bytes(4)));
-            $stmt = $conexion->prepare("INSERT INTO entradas (partido_id, estado_pago, codigo_qr) VALUES (:partido, 'Pagado', :codigo)");
-            $stmt->execute([':partido' => $partidoId, ':codigo' => $codigo]);
+            $usuarioId = (int) ($_SESSION['usuario']['id'] ?? 0);
+            $stmt = $conexion->prepare("INSERT INTO entradas (usuario_id, partido_id, estado_pago, codigo_qr) VALUES (:usuario, :partido, 'Pagado', :codigo)");
+            $stmt->execute([':usuario' => $usuarioId ?: null, ':partido' => $partidoId, ':codigo' => $codigo]);
             $mensaje = 'Pago aceptado. Tu código de entrada es ' . $codigo . '.';
         } catch (PDOException $e) {
             $error = 'Error al procesar el pago: ' . $e->getMessage();
@@ -54,6 +94,7 @@ try {
     <link rel="stylesheet" href="css/torneo.css">
     <link rel="stylesheet" href="css/animaciones.css">
     <script src="js/animaciones.js"></script>
+    <script src="js/antireload.js"></script>
     <style>
         .grid-partidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin: 20px 0 30px; }
         .card-partido { background: #1e1e1e; border: 2px solid #333; border-radius: 12px; padding: 20px; transition: border-color .3s; }
@@ -99,15 +140,17 @@ try {
     </a>
     <nav class="nav">
         <a href="ver.php">Equipos</a>
-        <a href="torneo.php">Ruleta</a>
+        <a href="torneo.php">Torneo</a>
         <a href="partidos.php" class="activo">Partidos</a>
-        <a class="nav-cta" href="crear.php">+ Nuevo</a>
+        <?= nav_usuario_html() ?>
     </nav>
 </header>
 
 <main class="envoltura">
-    <h1 class="seccion-titulo">🎟️ Ver partido</h1>
-    <p class="seccion-sub">Elige el partido que quieras ver y paga tu entrada para obtener el acceso.</p>
+    <h1 class="seccion-titulo">🎟️ <?= $esAdmin ? 'Gestionar partidos' : 'Ver partido' ?></h1>
+    <p class="seccion-sub"><?= $esAdmin
+        ? 'Crea nuevos partidos y revisa los existentes.'
+        : 'Elige el partido que quieras ver y paga tu entrada para obtener el acceso.' ?></p>
 
     <?php if ($mensaje !== ''): ?>
         <div class="alerta-ok">✅ <?= htmlspecialchars($mensaje) ?></div>
@@ -115,6 +158,51 @@ try {
     <?php if ($error !== ''): ?>
         <div class="alerta-error">❌ <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
+
+    <?php if ($esAdmin): ?>
+    <div class="form-panel" style="margin-bottom:24px;">
+        <h2 style="color:#fff;margin-top:0;">➕ Crear partido nuevo</h2>
+        <?php if (count($equipos) < 2): ?>
+            <p style="color:#aaa;margin:0;">Necesitas al menos dos equipos registrados para crear un partido.
+               <a href="crear.php" style="color:var(--dorado);">Crea equipos aquí</a>.</p>
+        <?php else: ?>
+            <form method="post">
+                <input type="hidden" name="accion" value="crear_partido">
+                <div class="form-grid">
+                    <label>Equipo local
+                        <select name="equipo_local_id" required>
+                            <option value="">Seleccionar…</option>
+                            <?php foreach ($equipos as $eq): ?>
+                                <option value="<?= (int)$eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['liga']) ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>Equipo visitante
+                        <select name="equipo_visitante_id" required>
+                            <option value="">Seleccionar…</option>
+                            <?php foreach ($equipos as $eq): ?>
+                                <option value="<?= (int)$eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['liga']) ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>Fecha y hora
+                        <input type="datetime-local" name="fecha_hora" required>
+                    </label>
+                    <label>Estadio
+                        <input type="text" name="estadio" placeholder="Ej. Estadio Central" required>
+                    </label>
+                    <label>Precio de entrada
+                        <input type="number" name="precio_entrada" min="0" step="0.01" placeholder="Ej. 25.00" required>
+                    </label>
+                </div>
+                <div style="margin-top:14px;">
+                    <button type="submit" class="btn btn-primario"><span class="btn-ico">💾</span><span>Guardar partido</span></button>
+                </div>
+            </form>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <div class="form-panel">
         <form onsubmit="return false;">
             <div class="form-grid">

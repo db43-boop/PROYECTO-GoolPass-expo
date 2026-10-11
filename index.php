@@ -1,10 +1,12 @@
 <?php
-require_once 'conexion.php';
+require_once 'auth.php';
+requerir_login();
 
 // --- Datos para la portada (con degradación segura si la BD falla) ---
 $totalEquipos = 0;
 $totalLigas = 0;
 $ultimos = [];
+$jugadoresPorEquipo = [];
 
 try {
     $totalEquipos = (int) $conexion->query("SELECT COUNT(*) FROM equipos")->fetchColumn();
@@ -14,8 +16,19 @@ try {
 
     $stmt = $conexion->query("SELECT id, nombre, liga, escudo, anio FROM equipos ORDER BY id DESC LIMIT 6");
     $ultimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Plantilla de jugadores de cada equipo mostrado (agrupada por equipo_id)
+    if ($ultimos) {
+        $ids = array_map('intval', array_column($ultimos, 'id'));
+        $in  = implode(',', $ids);
+        $stmtJ = $conexion->query("SELECT equipo_id, nombre, posicion FROM jugadores WHERE equipo_id IN ($in) ORDER BY id");
+        foreach ($stmtJ->fetchAll(PDO::FETCH_ASSOC) as $j) {
+            $jugadoresPorEquipo[(int)$j['equipo_id']][] = $j;
+        }
+    }
 } catch (PDOException $e) {
     $ultimos = [];
+    $jugadoresPorEquipo = [];
 }
 
 /** Devuelve la inicial para el avatar de respaldo */
@@ -25,6 +38,18 @@ function inicial_avatar($nombre)
     if ($nombre === '') return '?';
     return mb_strtoupper(mb_substr($nombre, 0, 1, 'UTF-8'));
 }
+
+/** Abreviatura y clase de color según la posición del jugador */
+function pos_meta($pos)
+{
+    switch ($pos) {
+        case 'Portero':         return ['POR', 'por'];
+        case 'Defensas':        return ['DEF', 'def'];
+        case 'Centrocampistas': return ['MED', 'med'];
+        case 'Delanteros':      return ['DEL', 'del'];
+        default:                return ['—',   'otro'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -32,7 +57,7 @@ function inicial_avatar($nombre)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GoolPass - Portada</title>
-    <meta name="description" content="Registra clubes, género, liga y plantillas, genera sus fichas y organiza eliminatorias con la ruleta.">
+    <meta name="description" content="Registra clubes, su liga y su plantilla de jugadores, genera sus fichas y organiza los partidos del torneo.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,6 +66,7 @@ function inicial_avatar($nombre)
     <link rel="stylesheet" href="css/animaciones.css">
 
     <script src="js/animaciones.js"></script>
+    <script src="js/antireload.js"></script>
 </head>
 <body>
 
@@ -65,7 +91,7 @@ function inicial_avatar($nombre)
 
     <nav class="nav">
         <a href="ver.php">Equipos</a>
-        <a href="torneo.php">Ruleta</a>
+        <a href="torneo.php">Torneo</a>
         <a href="partidos.php">Partidos</a>
         <button type="button" class="btn-anim" data-anim-toggle aria-pressed="false"
                 title="Desactivar animaciones (modo ligero)">
@@ -73,7 +99,7 @@ function inicial_avatar($nombre)
             <span class="btn-anim-txt">Animaciones</span>
             <span class="btn-anim-estado" data-anim-estado>ON</span>
         </button>
-        <a class="nav-cta" href="crear.php">+ Nuevo</a>
+        <?= nav_usuario_html() ?>
     </nav>
 </header>
 
@@ -90,9 +116,9 @@ function inicial_avatar($nombre)
         </h1>
 
         <p class="bajada">
-            Registra <b>clubes</b>, <b>géneros</b>, <b>ligas</b> y <b>plantillas</b>,
-            genera sus fichas con diseño único y organiza las eliminatorias
-            con la ruleta. Todo en un solo lugar.
+            Registra <b>clubes</b>, su <b>liga</b> y su <b>plantilla</b> de jugadores,
+            genera sus fichas y organiza los <b>partidos</b> del torneo.
+            Todo en un solo lugar.
         </p>
 
         <div class="acciones">
@@ -108,24 +134,28 @@ function inicial_avatar($nombre)
     </section>
 
     <aside class="hero-stat">
-        <div class="stat-box">
-            <span class="stat-ico" aria-hidden="true">⚽</span>
-            <span class="stat-num"><?= (int)$totalEquipos ?></span>
-            <span class="stat-label">Equipos registrados</span>
-        </div>
-        <div class="stat-box">
-            <span class="stat-num"><?= (int)$totalLigas ?></span>
-            <span class="stat-label">Ligas disponibles</span>
+        <div class="stats-par">
+            <div class="stat-box">
+                <span class="stat-ico" aria-hidden="true">⚽</span>
+                <span class="stat-num"><?= (int)$totalEquipos ?></span>
+                <span class="stat-label">Equipos registrados</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-ico" aria-hidden="true">🏆</span>
+                <span class="stat-num"><?= (int)$totalLigas ?></span>
+                <span class="stat-label">Ligas disponibles</span>
+            </div>
         </div>
 
     <?php if (count($ultimos) === 0): ?>
         <div class="vaciado">
             <p>Aún no hay equipos registrados.</p>
-            <p>Administrador, <a href="partidos.php">mira tus partidos aqui</a>.</p>
+            <p>Administrador, <a href="partidos.php">mira tus partidos aquí</a>.</p>
         </div>
     <?php else: ?>
         <div class="fila">
             <?php foreach ($ultimos as $eq): ?>
+            <?php $plan = $jugadoresPorEquipo[(int)$eq['id']] ?? []; ?>
             <div class="card-equipo">
                 <div class="img-wrapper">
                     <?php if (!empty($eq['escudo']) && file_exists('uploads/' . $eq['escudo'])): ?>
@@ -136,10 +166,23 @@ function inicial_avatar($nombre)
                 </div>
                 <div class="info">
                     <h3><?= htmlspecialchars($eq['nombre']) ?></h3>
-                    <span class="liga"><?= htmlspecialchars($eq['liga']) ?><?= trim($eq['anio'] ?? '') !== '' ? ' &middot; ' . htmlspecialchars($eq['anio']) : '' ?></span>
+                    <span class="liga"><?= htmlspecialchars($eq['liga']) ?><?= trim($eq['anio'] ?? '') !== '' ? ' · ' . htmlspecialchars($eq['anio']) : '' ?></span>
+                    <?php if ($plan): ?>
+                    <div class="plantilla">
+                        <?php foreach ($plan as $pl): $meta = pos_meta($pl['posicion']); ?>
+                        <span class="jug-chip" title="<?= htmlspecialchars($pl['posicion']) ?>">
+                            <i class="dot pos-<?= $meta[1] ?>"></i><?= htmlspecialchars($pl['nombre']) ?>
+                        </span>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php else: ?>
+                    <div class="plantilla plantilla-vacia">Sin plantilla</div>
+                    <?php endif; ?>
                 </div>
-                <a href="ficha.php?id=<?= (int)$eq['id'] ?>" class="icon-btn" title="Ver ficha">◉</a>
-                <a href="editar.php?id=<?= (int)$eq['id'] ?>" class="icon-btn" title="Editar">✎</a>
+                <div class="card-acciones">
+                    <a href="ficha.php?id=<?= (int)$eq['id'] ?>" class="icon-btn" title="Ver ficha">◉</a>
+                    <a href="editar.php?id=<?= (int)$eq['id'] ?>" class="icon-btn" title="Editar">✎</a>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -153,7 +196,7 @@ function inicial_avatar($nombre)
     <span class="sep">·</span>
     <a href="ver.php">Equipos</a>
     <span class="sep">·</span>
-    <a href="torneo.php">Ruleta</a>
+    <a href="torneo.php">Torneo</a>
     <span class="sep">·</span>
     <a href="partidos.php">Partidos</a>
     <span class="sep">·</span>

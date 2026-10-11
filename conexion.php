@@ -55,6 +55,41 @@ try {
 
     $conexion->exec($crear_tablas);
 
+    // --- Tabla de usuarios (login/registro con roles admin/usuario) ---
+    $conexion->exec("
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            rol TEXT NOT NULL DEFAULT 'usuario',
+            creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    ");
+
+    // --- Cuenta de administrador por defecto (credenciales básicas) ---
+    // Se crea una sola vez si todavía no existe ningún administrador.
+    $adminEmail = 'admin@goolpass.com';
+    $adminPass  = 'admin123';
+    $hayAdmin = $conexion->query(
+        "SELECT COUNT(*) FROM usuarios WHERE rol = 'admin'"
+    )->fetchColumn();
+
+    if ((int) $hayAdmin === 0) {
+        $existe = $conexion->prepare("SELECT id FROM usuarios WHERE email = :e LIMIT 1");
+        $existe->execute([':e' => $adminEmail]);
+        if (!$existe->fetch()) {
+            $seed = $conexion->prepare(
+                "INSERT INTO usuarios (nombre, email, password, rol) VALUES (:n, :e, :p, 'admin')"
+            );
+            $seed->execute([
+                ':n' => 'Administrador',
+                ':e' => $adminEmail,
+                ':p' => password_hash($adminPass, PASSWORD_DEFAULT),
+            ]);
+        }
+    }
+
     // Agregar las columnas que faltaron si las tablas existían antes
     $columnas = [
         'equipos' => ['escudo', 'anio'],

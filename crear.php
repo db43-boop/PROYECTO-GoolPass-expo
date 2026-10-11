@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/auth.php';
+requerir_login();
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,6 +19,23 @@
     <link rel="stylesheet" href="css/animaciones.css">
 
     <script src="js/animaciones.js"></script>
+    <script src="js/antireload.js"></script>
+    <style>
+        .seccion-jugadores { margin-top: 8px; border-top: 1px solid var(--panel-borde, rgba(255,255,255,.1)); padding-top: 18px; }
+        .seccion-jugadores > h3 { font-family: var(--fuente, 'Outfit'); font-size: 17px; font-weight: 800; margin: 0 0 4px; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .seccion-jugadores .hint { color: var(--tenue, #9a9aae); font-size: 12.5px; font-weight: 500; margin: 0 0 14px; }
+        .jugador-fila { display: grid; grid-template-columns: 1.6fr 1.3fr auto; gap: 10px; align-items: end; padding: 12px; margin-bottom: 10px; background: rgba(0,0,0,.28); border: 1px solid var(--panel-borde, rgba(255,255,255,.1)); border-radius: 12px; }
+        .jugador-fila .campo { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+        .jugador-fila .campo label { color: var(--tenue, #9a9aae); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+        .jugador-fila input, .jugador-fila select { width: 100%; padding: 9px 10px; border-radius: 9px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.35); color: #fff; font-family: inherit; font-size: 13.5px; }
+        .jugador-fila input:focus, .jugador-fila select:focus { outline: none; border-color: rgba(255,122,51,.65); }
+        .btn-quitar-jug { border: none; background: rgba(211,47,47,.25); color: #ff8a80; width: 38px; height: 38px; border-radius: 9px; cursor: pointer; font-size: 16px; line-height: 1; transition: .2s; }
+        .btn-quitar-jug:hover { background: rgba(211,47,47,.45); color: #fff; }
+        .btn-agregar-jug { margin-top: 4px; border: 1px dashed rgba(255,122,51,.55); background: rgba(255,122,51,.08); color: var(--naranja-2, #ff7a33); font-weight: 700; font-size: 14px; padding: 11px 16px; border-radius: 10px; cursor: pointer; font-family: var(--fuente, 'Outfit'); transition: .2s; }
+        .btn-agregar-jug:hover { background: rgba(255,122,51,.16); }
+        .sin-jugadores { color: var(--tenue, #9a9aae); font-size: 13.5px; background: rgba(0,0,0,.2); border: 1px dashed var(--panel-borde, rgba(255,255,255,.1)); border-radius: 12px; padding: 16px; text-align: center; margin: 0; }
+        @media (max-width: 700px) { .jugador-fila { grid-template-columns: 1fr 1fr; } .jugador-fila .campo-ancho { grid-column: 1 / -1; } }
+    </style>
 </head>
 <body>
 
@@ -40,8 +61,9 @@
     <nav class="nav" aria-label="Navegación principal">
         <a href="index.php">Portada</a>
         <a href="ver.php">Equipos</a>
-        <a href="torneo.php">Ruleta &amp; Torneo</a>
-        <a href="crear.php" class="nav-cta">+ Nuevo Equipo</a>
+        <a href="torneo.php">Torneo</a>
+        <a href="partidos.php">Partidos</a>
+        <?= nav_usuario_html() ?>
     </nav>
 </header>
 
@@ -100,6 +122,36 @@
                     <img id="imgPreview" src="" alt="Vista previa del escudo" style="max-width:200px;max-height:120px;display:block;margin:0 auto;">
                     <button type="button" class="btn-borrar" onclick="quitarEscudo()">&#10005; Quitar</button>
                 </div>
+
+                <div class="seccion-jugadores">
+                    <h3>&#128101; Plantilla de jugadores <span style="color:var(--tenue,#9a9aae);font-weight:500;font-size:12px;">(opcional)</span></h3>
+                    <p class="hint">Agrega a los jugadores de este equipo. Más tarde podrás completar sus estadísticas desde su ficha.</p>
+
+                    <div id="listaJugadores"></div>
+                    <p id="sinJugadores" class="sin-jugadores">Aún no has agregado jugadores.</p>
+
+                    <button type="button" class="btn-agregar-jug" onclick="agregarJugador()">&#10133; Agregar jugador</button>
+                </div>
+
+                <template id="tplJugador">
+                    <div class="jugador-fila">
+                        <div class="campo campo-ancho">
+                            <label>Nombre</label>
+                            <input type="text" name="jugadores[][nombre]" placeholder="Nombre del jugador">
+                        </div>
+                        <div class="campo">
+                            <label>Posición</label>
+                            <select name="jugadores[][posicion]">
+                                <option value="">Selecciona…</option>
+                                <option value="Portero">Portero</option>
+                                <option value="Defensas">Defensas</option>
+                                <option value="Centrocampistas">Centrocampistas</option>
+                                <option value="Delanteros">Delanteros</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn-quitar-jug" onclick="quitarJugador(this)" title="Quitar jugador">&#10005;</button>
+                    </div>
+                </template>
 
                 <div class="acciones">
                     <button type="submit" class="btn-principal">&#10132; Guardar Equipo</button>
@@ -180,6 +232,25 @@
         prev.style.display = 'none';
         document.getElementById('noImgText').style.display = 'flex';
         document.getElementById('txtEscudo').innerText = 'Pendiente';
+    }
+
+    // --- Gestión dinámica de la plantilla de jugadores ---
+    function agregarJugador() {
+        const plantilla = document.getElementById('tplJugador');
+        const nodo = plantilla.content.firstElementChild.cloneNode(true);
+        document.getElementById('listaJugadores').appendChild(nodo);
+        actualizarSinJugadores();
+        nodo.querySelector('input[name="jugadores[][nombre]"]').focus();
+    }
+
+    function quitarJugador(boton) {
+        boton.closest('.jugador-fila').remove();
+        actualizarSinJugadores();
+    }
+
+    function actualizarSinJugadores() {
+        const hay = document.querySelectorAll('#listaJugadores .jugador-fila').length > 0;
+        document.getElementById('sinJugadores').style.display = hay ? 'none' : 'block';
     }
 
     // Sincroniza la vista previa con los valores iniciales del formulario
