@@ -1,5 +1,5 @@
 <?php
-/** Parámetros técnicos de GoolPass; las ligas están en app/Catalogs. */
+/** Parámetros técnicos de GoolPass. */
 return [
     'name' => 'GoolPass',
     'timezone' => 'America/Lima',

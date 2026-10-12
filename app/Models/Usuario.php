@@ -1,31 +1,14 @@
 <?php
-final class Usuario
-{
-    public static function buscarPorCorreo(string $email): array|false
-    {
-        $stmt=Database::connection()->prepare('SELECT id,nombre,email,rol,password FROM usuarios WHERE email=:email LIMIT 1');
-        $stmt->execute([':email'=>$email]);return $stmt->fetch();
+declare(strict_types=1);
+namespace GoolPass\Models;
+use PDO;
+
+final class Usuario {
+    public function __construct(private PDO $db) {}
+    public function crear(string $nombre, string $email, string $passwordHash): int {
+        $s=$this->db->prepare('INSERT INTO usuarios(nombre,email,password) VALUES(:n,:e,:p)');
+        $s->execute([':n'=>trim($nombre), ':e'=>trim($email), ':p'=>$passwordHash]); return (int)$this->db->lastInsertId();
     }
-    public static function listar(): array
-    {
-        return Database::connection()->query('SELECT id,nombre,email,rol,creado_en FROM usuarios ORDER BY id DESC')->fetchAll();
-    }
-    public static function crear(string $nombre,string $email,string $password,string $rol='usuario'): int
-    {
-        if(!in_array($rol,['usuario','admin'],true)) throw new InvalidArgumentException('Rol no válido');
-        $db=Database::connection();
-        $db->prepare('INSERT INTO usuarios (nombre,email,password,rol) VALUES (:nombre,:email,:password,:rol)')
-           ->execute([':nombre'=>$nombre,':email'=>$email,':password'=>password_hash($password,PASSWORD_DEFAULT),':rol'=>$rol]);
-        return (int)$db->lastInsertId();
-    }
-    public static function configurarAdmin(string $nombre,string $email,string $password): bool
-    {
-        $actual=self::buscarPorCorreo($email);
-        if($actual){
-            Database::connection()->prepare("UPDATE usuarios SET nombre=:nombre,password=:password,rol='admin' WHERE id=:id")
-                ->execute([':nombre'=>$nombre,':password'=>password_hash($password,PASSWORD_DEFAULT),':id'=>$actual['id']]);
-            return true;
-        }
-        self::crear($nombre,$email,$password,'admin');return false;
-    }
+    public function buscarPorEmail(string $email): ?array { $s=$this->db->prepare('SELECT id,nombre,email,password,creado_en FROM usuarios WHERE email=:e COLLATE NOCASE'); $s->execute([':e'=>trim($email)]); return $s->fetch(PDO::FETCH_ASSOC) ?: null; }
+    public function buscarPorId(int $id): ?array { $s=$this->db->prepare('SELECT id,nombre,email,creado_en FROM usuarios WHERE id=:id'); $s->execute([':id'=>$id]); return $s->fetch(PDO::FETCH_ASSOC) ?: null; }
 }

@@ -1,20 +1,12 @@
 <?php
-final class Torneo
-{
-    public static function buscar(string $origen): array|false
-    {
-        $stmt=Database::connection()->prepare('SELECT estado_json,actualizado_en FROM torneos_guardados WHERE origen=:origen');
-        $stmt->execute([':origen'=>$origen]);return $stmt->fetch();
-    }
-    public static function eliminar(string $origen): void
-    {
-        Database::connection()->prepare('DELETE FROM torneos_guardados WHERE origen=:origen')->execute([':origen'=>$origen]);
-    }
-    public static function guardar(string $origen,array $estado): void
-    {
-        Database::connection()->prepare('INSERT INTO torneos_guardados(origen,estado_json,actualizado_en)
-          VALUES (:origen,:estado,CURRENT_TIMESTAMP)
-          ON CONFLICT(origen) DO UPDATE SET estado_json=excluded.estado_json,actualizado_en=CURRENT_TIMESTAMP')
-          ->execute([':origen'=>$origen,':estado'=>json_encode($estado,JSON_UNESCAPED_UNICODE)]);
-    }
+declare(strict_types=1);
+namespace GoolPass\Models;
+use PDO;
+
+final class Torneo {
+    public function __construct(private PDO $db) {}
+    public function listar(): array { return $this->db->query('SELECT * FROM torneos ORDER BY fecha_inicio DESC, nombre')->fetchAll(PDO::FETCH_ASSOC); }
+    public function buscarPorId(int $id): ?array { $s=$this->db->prepare('SELECT * FROM torneos WHERE id=:id'); $s->execute([':id'=>$id]); return $s->fetch(PDO::FETCH_ASSOC) ?: null; }
+    public function crear(array $d): int { $s=$this->db->prepare('INSERT INTO torneos(nombre,categoria,formato,estado,fecha_inicio,fecha_fin) VALUES(:n,:c,:f,:e,:i,:fin)'); $s->execute([':n'=>trim($d['nombre']??''),':c'=>$d['categoria']??'',':f'=>$d['formato']??'',':e'=>$d['estado']??'abierto',':i'=>$d['fecha_inicio']??null,':fin'=>$d['fecha_fin']??null]); return (int)$this->db->lastInsertId(); }
+    public function actualizar(int $id,array $d): bool { $s=$this->db->prepare('UPDATE torneos SET nombre=:n,categoria=:c,formato=:f,estado=:e,fecha_inicio=:i,fecha_fin=:fin WHERE id=:id'); $s->execute([':n'=>trim($d['nombre']??''),':c'=>$d['categoria']??'',':f'=>$d['formato']??'',':e'=>$d['estado']??'abierto',':i'=>$d['fecha_inicio']??null,':fin'=>$d['fecha_fin']??null,':id'=>$id]); return $s->rowCount()>0; }
 }

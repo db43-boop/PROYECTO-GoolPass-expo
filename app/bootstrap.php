@@ -9,12 +9,23 @@ if (!defined('GOOLPASS_ROOT')) {
 $appConfig = require GOOLPASS_ROOT . '/app/Config/app.php';
 date_default_timezone_set($appConfig['timezone']);
 spl_autoload_register(static function (string $clase): void {
+    $prefijoModelosMvp = 'GoolPass\\Models\\';
+    if (str_starts_with($clase, $prefijoModelosMvp)) {
+        $nombre = substr($clase, strlen($prefijoModelosMvp));
+        if (!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', $nombre)) return;
+        $ruta = GOOLPASS_ROOT . '/app/Models/' . $nombre . '.php';
+        if (is_file($ruta)) require_once $ruta;
+        return;
+    }
     if (!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', $clase)) return;
-    $ruta=GOOLPASS_ROOT . '/app/Models/' . $clase . '.php';
-    if (is_file($ruta)) require_once $ruta;
+    $ruta = GOOLPASS_ROOT . '/app/Controllers/' . $clase . '.php';
+    if (is_file($ruta)) {
+        require_once $ruta;
+    }
 });
 require_once GOOLPASS_ROOT . '/app/Core/Database.php';
-require_once GOOLPASS_ROOT . '/app/Database/Migrations/Schema.php';
+require_once GOOLPASS_ROOT . '/app/Core/View.php';
+require_once GOOLPASS_ROOT . '/app/Schema.php';
 try {
     $conexion = Database::connection();
     Schema::migrate($conexion);

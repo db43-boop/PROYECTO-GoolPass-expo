@@ -1,96 +1,47 @@
-# GoolPass — Aplicación MVC en PHP y SQLite
+# GoolPass MVP
 
-Sistema de gestión de campeonatos nacionales e internacionales con equipos, plantillas, torneos, resultados, entradas simuladas y roles de usuario.
+Aplicación local para gestionar equipos, jugadores, torneos, inscripciones, partidos, estadísticas por partido y entradas. Está hecha con PHP, HTML/CSS y SQLite para ejecutarse con XAMPP. Todas las cuentas tienen las mismas funciones; no se usan roles. Las entradas se pueden comprar con una cuenta o como invitado.
 
-## Arquitectura
+## Estructura
 
-La aplicación utiliza **MVC con controladores PHP, clases de modelos y vistas**, conservando los archivos de entrada en la raíz para que sigan funcionando las URLs usadas anteriormente. La lógica del proyecto está separada de los archivos de vista y las consultas SQL están concentradas en los modelos. No requiere Laravel ni Composer.
+`public/index.php` es el único punto de entrada web. Despacha las rutas a controladores de `app/Controllers`; estos validan los formularios, usan modelos PDO de `app/Models` y cargan las plantillas de `app/Views`. El código legado que no pertenece al MVP se retiró.
 
-```text
-PROYECTO-GoolPass-expo/
-├── app/
-│   ├── bootstrap.php                    # Inicialización y autoload
-│   ├── Catalogs/
-│   │   └── catalogo_ligas.php           # Ligas nacionales e internacionales
-│   ├── Config/
-│   │   ├── app.php                      # Nombre y zona horaria
-│   │   └── database.php                 # Ruta de SQLite
-│   ├── Core/
-│   │   ├── Database.php                 # Conexión PDO y PRAGMA
-│   │   └── auth.php                     # Sesiones, roles y CSRF
-│   ├── Database/Migrations/
-│   │   └── Schema.php                   # Creación y actualización de tablas
-│   ├── Models/
-│   │   ├── Equipo.php                   # Consultas, CRUD y clasificación
-│   │   ├── Jugador.php                  # Plantillas y estadísticas
-│   │   ├── Usuario.php                  # Autenticación y gestión de cuentas
-│   │   ├── Partido.php                  # Programación y resultados
-│   │   ├── Entrada.php                  # Entradas por usuario y partido
-│   │   └── Torneo.php                   # Guardado de etapas y campeones
-│   ├── Controllers/
-│   │   ├── pages/                        # Procesan peticiones de pantallas
-│   │   └── actions/                      # Guardado, API y cierre de sesión
-│   ├── Services/
-│   │   ├── escudos.php                  # Subida/validación de imágenes
-│   │   └── formacion.php               # Posiciones de jugadores
-│   └── Views/
-│       ├── pages/                        # HTML de cada módulo
-│       └── partials/                     # Encabezado y fragmentos reutilizables
-├── public/
-│   ├── css/
-│   ├── js/
-│   └── uploads/
-├── storage/
-│   └── torneo.db                        # SQLite local de demostración
-├── scripts/
-│   ├── configurar_admin.php
-│   ├── migrar_datos_anteriores.php
-│   └── nuevo_setup.php                 # Reinicio destructivo (no ejecutar normalmente)
-├── docs/
-│   ├── ARQUITECTURA_MVC.md
-│   └── INSTALACION_Y_MIGRACION.md
-├── index.php, login.php, crear.php, ver.php, ...
-├── .htaccess
-└── .gitignore
-```
+`storage/goolpass.db` es la base activa del MVP y se crea al inicializar SQLite por primera vez. No se importan datos de la antigua `torneo.db`, que fue retirada. Los escudos cargados por el usuario se guardan bajo `public/uploads/`. Los archivos de `app/` y `storage/` están protegidos contra acceso directo de Apache.
 
-**Importante:** `app/Config/database.php` indica **dónde** está la base de datos, `app/Core/Database.php` **abre** la conexión y `app/Database/Migrations/Schema.php` **crea o actualiza las tablas**. Las consultas CRUD corresponden a `app/Models/`.
+## Ejecutar con XAMPP
 
-## Instalación en Windows + XAMPP
+1. Coloca el proyecto en `C:\xampp\htdocs\PROYECTO-GoolPass-expo` y activa Apache.
+2. Verifica que PHP tenga habilitado PDO SQLite.
+3. Abre `http://localhost/PROYECTO-GoolPass-expo/`.
+4. Regístrate o inicia sesión. El inicio lleva a la gestión de equipos.
 
-1. Haz una copia de seguridad de tu GoolPass actual, especialmente `torneo.db` y `uploads/`.
-2. Extrae la carpeta `PROYECTO-GoolPass-expo` dentro de `C:\xampp\htdocs\`. Para probar sin riesgos, usa un nombre alternativo (por ejemplo `GoolPass-MVC`) y conserva el original intacto.
-3. Activa **Apache** en XAMPP. No es necesario MySQL.
-4. Comprueba en Git Bash la extensión de PHP con `/c/xampp/php/php.exe -m | grep -i sqlite`. Debe aparecer `pdo_sqlite`.
-5. Abre `http://localhost/PROYECTO-GoolPass-expo/login.php` (o el nombre de la carpeta que hayas usado).
+Apache redirige las solicitudes a `public/index.php`. Las rutas se despachan con el parámetro `r`, por ejemplo `index.php?r=torneos`; las vistas generan esos enlaces mediante `url_for()`.
 
-**Cuentas de demostración de la base incluida (solo uso local):**
+## Rutas del MVP
 
-- Administrador: `admin@goolpass.com` — `admin123`
-- Usuario: `usuario@goolpass.com` — `12345678`
+- `login`, `register`, `logout`: autenticación y cierre de sesión.
+- `equipos`, `equipos/crear`, `equipos/ver`, `equipos/jugadores/crear`: equipos y plantilla.
+- `torneos`, `torneos/crear`, `torneos/inscribir`: torneos e inscripciones.
+- `partidos`, `partidos/crear`, `partidos/estadisticas`: partidos manuales y estadísticas por jugador.
+- `entradas`, `entradas/comprar`: consulta de disponibilidad y compra de una entrada por envío.
 
-Estas contraseñas son intencionadamente sencillas para la exposición; **cámbialas antes de usar el proyecto fuera de localhost**. Para configurar el administrador desde Git Bash:
+Las operaciones que cambian datos usan POST y token CSRF. Los controladores usan una conexión PDO compartida y no generan SQL en las vistas.
 
-```bash
-cd /c/xampp/htdocs/PROYECTO-GoolPass-expo
-/c/xampp/php/php.exe configurar_admin.php
-```
+## Base local y migraciones
 
-## Conservar tu base anterior
+La configuración usa `storage/goolpass.db`. En una base vacía, el bootstrap crea el esquema canónico limpio v3 para el MVP: usuarios sin roles, equipos, jugadores sin estadísticas acumuladas, torneos, inscripciones, partidos, estadísticas por partido y entradas. No crea tablas heredadas como `torneos_guardados`. La ruta v2→v3 permanece solo para compatibilidad explícita; no es la ruta activa de instalación y no asigna torneos a partidos antiguos.
 
-**No sobrescribas tu base de datos real con la de demostración del ZIP.** Consulta `docs/INSTALACION_Y_MIGRACION.md`. La nueva ubicación es `storage/torneo.db`; los escudos van en `public/uploads/`.
+La creación del esquema se verificó en una base temporal vacía y en `storage/goolpass.db`.
 
-La carpeta `datos_prueba` fue eliminada. Los **8 equipos y 88 jugadores ficticios** que vienen en la base de demostración permanecen allí.
+## Reglas y límites del MVP
 
-## Rutas compatibles
+- Cada equipo puede inscribirse en un solo torneo durante la vida de su registro. Equipos nacionales pueden entrar a torneos nacionales o internacionales; equipos internacionales solo a internacionales.
+- El formato del torneo es descriptivo. No se generan fixtures, rondas ni clasificaciones.
+- Los partidos se crean manualmente. Las estadísticas se registran manualmente por jugador y partido.
+- Cada entrada equivale a una persona y reserva una plaza. El modelo controla el aforo de forma transaccional. No hay asientos numerados ni compras agrupadas.
+- Se registra estado de pago, pero no hay pasarela bancaria ni cobros reales.
+- El formulario del MVP no ofrece actualización del marcador todavía, aunque el modelo ya expone la operación.
 
-Las páginas se siguen abriendo con `index.php`, `crear.php`, `ver.php`, `ficha.php`, `partidos.php`, `torneo.php`, `usuarios.php`, `mis_entradas.php` y `perfil.php`. Los archivos de la raíz solamente conectan un controlador con su vista.
+## Validación
 
-## Seguridad y limitaciones
-
-- Rutas internas `app/`, `storage/` y `scripts/` protegidas contra acceso directo por Apache (`.htaccess`).
-- El usuario común puede consultar torneos, equipos, resultados y comprar entradas **simuladas**, pero no administrar datos.
-- No se realizan cobros bancarios. Los números de tarjeta introducidos en la simulación no se almacenan.
-- El modelo `Torneo` guarda un torneo vigente por origen; no es un historial multi-temporada.
-- Las migraciones usan `PRAGMA user_version` para ejecutarse solo cuando la versión de SQLite necesita actualizarse.
-- La migración completa de cada pantalla debe comprobarse con el PHP y PDO SQLite de XAMPP.
+La integración se validó con PHP/PDO SQLite de XAMPP; el esquema nuevo quedó vacío y las rutas MVP pasaron validación de sintaxis.

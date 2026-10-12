@@ -1,10 +1,7 @@
-# Cada integrante conserva su propia base de datos y sus registros.
+# Bases SQLite locales; cada instalación crea su propia base.
 /storage/*.db
 /storage/*.db-wal
 /storage/*.db-shm
-/torneo.db
-/torneo.db-wal
-/torneo.db-shm
 *.log
 *.bak
 *.backup
@@ -12,3 +9,5 @@
 *.temp
 Thumbs.db
 .DS_Store
+
+no/
