@@ -15,7 +15,7 @@ final class PartidoController
     public function index():void{need_login();$this->render([],null,null,$this->id($_GET['torneo_id']??null));}
     public function create():void
     {
-        need_login();check_csrf();$d=['torneo_id'=>$this->id($_POST['torneo_id']??null),'equipo_local_id'=>$this->id($_POST['equipo_local_id']??null),'equipo_visitante_id'=>$this->id($_POST['equipo_visitante_id']??null),'fecha_hora'=>trim((string)($_POST['fecha_hora']??'')),'estadio'=>trim((string)($_POST['estadio']??'')),'precio_entrada'=>$_POST['precio_entrada']??null,'aforo'=>$_POST['aforo']??null];$errors=[];
+        need_login();check_csrf();$estadioSeleccionado=trim((string)($_POST['estadio']??''));$estadioOtro=trim((string)($_POST['estadio_otro']??''));$d=['torneo_id'=>$this->id($_POST['torneo_id']??null),'equipo_local_id'=>$this->id($_POST['equipo_local_id']??null),'equipo_visitante_id'=>$this->id($_POST['equipo_visitante_id']??null),'fecha_hora'=>trim((string)($_POST['fecha_hora']??'')),'estadio'=>$estadioSeleccionado==='otro'?$estadioOtro:$estadioSeleccionado,'precio_entrada'=>$_POST['precio_entrada']??null,'aforo'=>$_POST['aforo']??null];$errors=[];
         $t=$d['torneo_id']?$this->torneos->buscarPorId($d['torneo_id']):null;
         if(!$t)$errors[]='Selecciona un torneo existente.';
         if(!$d['equipo_local_id']||!$this->equipos->buscarPorId($d['equipo_local_id']))$errors[]='Selecciona un equipo local existente.';

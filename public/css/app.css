@@ -209,6 +209,7 @@ p { line-height: 1.62; }
 .crest { width: 58px; height: 58px; flex: 0 0 58px; object-fit: contain; }
 
 form { display: grid; gap: 1rem; }
+[hidden] { display: none !important; }
 label {
     display: grid;
     gap: .42rem;
@@ -311,6 +312,7 @@ input[type="checkbox"] {
 .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .form-action { align-self: end; }
 .card-actions { display: flex; flex-wrap: wrap; gap: .55rem; }
+.card-actions .toggle-form { display: flex; align-items: center; margin: 0; }
 .text-link { font-size: .9rem; }
 .vs { padding: 0 .2rem; font-size: .84em; font-weight: 650; }
 

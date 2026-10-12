@@ -15,11 +15,74 @@
         <?= csrf_field() ?><input type="hidden" name="torneo_id" value="<?= h($torneoSeleccionado['id']) ?>">
         <label>Equipo local<select name="equipo_local_id" required><option value="">Selecciona</option><?php foreach ($equipos as $equipo): ?><option value="<?= h($equipo['id']) ?>"><?= h($equipo['nombre']) ?></option><?php endforeach; ?></select></label>
         <label>Equipo visitante<select name="equipo_visitante_id" required><option value="">Selecciona</option><?php foreach ($equipos as $equipo): ?><option value="<?= h($equipo['id']) ?>"><?= h($equipo['nombre']) ?></option><?php endforeach; ?></select></label>
-        <label>Fecha y hora<input type="datetime-local" name="fecha_hora" required></label><label>Estadio<input name="estadio" required maxlength="140"></label>
+        <label>Fecha y hora<input type="datetime-local" name="fecha_hora" required></label>
+        <label>Estadio<select name="estadio" required>
+            <option value="">Selecciona un estadio</option>
+            <optgroup label="Perú">
+                <option value="Estadio Nacional (Lima)">Estadio Nacional (Lima)</option>
+                <option value="Estadio Monumental (Lima)">Estadio Monumental (Lima)</option>
+                <option value="Estadio Alejandro Villanueva (Lima)">Estadio Alejandro Villanueva (Lima)</option>
+                <option value="Estadio Alberto Gallardo (Lima)">Estadio Alberto Gallardo (Lima)</option>
+                <option value="Estadio Miguel Grau (Callao)">Estadio Miguel Grau (Callao)</option>
+                <option value="Estadio Monumental de la UNSA (Arequipa)">Estadio Monumental de la UNSA (Arequipa)</option>
+                <option value="Estadio Garcilaso de la Vega (Cusco)">Estadio Garcilaso de la Vega (Cusco)</option>
+                <option value="Estadio Mansiche (Trujillo)">Estadio Mansiche (Trujillo)</option>
+            </optgroup>
+            <optgroup label="Internacionales">
+                <option value="Wembley Stadium (Londres)">Wembley Stadium (Londres)</option>
+                <option value="Santiago Bernabéu (Madrid)">Santiago Bernabéu (Madrid)</option>
+                <option value="Camp Nou (Barcelona)">Camp Nou (Barcelona)</option>
+                <option value="San Siro (Milán)">San Siro (Milán)</option>
+                <option value="Allianz Arena (Múnich)">Allianz Arena (Múnich)</option>
+                <option value="Maracanã (Río de Janeiro)">Maracanã (Río de Janeiro)</option>
+                <option value="La Bombonera (Buenos Aires)">La Bombonera (Buenos Aires)</option>
+            </optgroup>
+            <option value="otro">Otro estadio</option>
+        </select></label>
+        <label data-other-stadium hidden style="display:none">Nombre del estadio<input name="estadio_otro" maxlength="140" disabled></label>
         <label>Precio de entrada<input type="number" name="precio_entrada" min="0" step="0.01" value="0.00" required></label><label>Aforo permitido<input type="number" name="aforo" min="1" step="1" required></label>
         <div class="form-action"><button class="button" type="submit">Guardar partido</button></div>
-    </form></section><?php endif; ?>
-    <section class="section-gap"><h2>Partidos del torneo</h2><?php if (empty($partidos)): ?><p class="empty-state">Todavía no hay partidos en este torneo.</p><?php else: ?><div class="card-list"><?php foreach ($partidos as $partido): ?><article class="card match-card"><div><h3><?= h($partido['equipo_local_nombre'] ?? 'Equipo local') ?> <span class="vs">vs.</span> <?= h($partido['equipo_visitante_nombre'] ?? 'Equipo visitante') ?></h3><p><?= h($partido['fecha_hora'] ?? '') ?></p><p><?= h($partido['estadio'] ?? '') ?> · Aforo <?= h($partido['aforo'] ?? '') ?> · <?= h($partido['precio_entrada'] ?? '0.00') ?></p></div><div class="card-actions"><a class="button button-secondary" href="<?= h(url_for('entradas', ['partido_id' => $partido['id']])) ?>">Entradas</a></div></article>
+    </form></section>
+    <script>
+    (() => {
+        const home = document.querySelector('[name="equipo_local_id"]');
+        const away = document.querySelector('[name="equipo_visitante_id"]');
+        const updateOptions = () => {
+            if (home.value && home.value === away.value) away.value = '';
+            [...home.options].forEach(option => {
+                const conflict = option.value !== '' && option.value === away.value;
+                option.hidden = conflict;
+                option.disabled = conflict;
+            });
+            [...away.options].forEach(option => {
+                const conflict = option.value !== '' && option.value === home.value;
+                option.hidden = conflict;
+                option.disabled = conflict;
+            });
+        };
+        home.addEventListener('change', updateOptions);
+        away.addEventListener('change', updateOptions);
+        updateOptions();
+    })();
+    </script>
+    <script>
+    (() => {
+        const stadium = document.querySelector('[name="estadio"]');
+        const otherField = document.querySelector('[data-other-stadium]');
+        const otherInput = otherField.querySelector('input');
+        const updateOtherField = () => {
+            const isOther = stadium.value === 'otro';
+            otherField.hidden = !isOther;
+            otherField.style.display = isOther ? 'grid' : 'none';
+            otherInput.required = isOther;
+            otherInput.disabled = !isOther;
+        };
+        stadium.addEventListener('change', updateOtherField);
+        updateOtherField();
+    })();
+    </script>
+    <?php endif; ?>
+    <section class="section-gap"><h2>Partidos del torneo</h2><?php if (empty($partidos)): ?><p class="empty-state">Todavía no hay partidos en este torneo.</p><?php else: ?><div class="card-list"><?php foreach ($partidos as $partido): ?><article class="card match-card"><div><h3><?= h($partido['equipo_local_nombre'] ?? 'Equipo local') ?> <span class="vs">vs.</span> <?= h($partido['equipo_visitante_nombre'] ?? 'Equipo visitante') ?></h3><p><?= h($partido['fecha_hora'] ?? '') ?></p><p><?= h($partido['estadio'] ?? '') ?> · Aforo <?= h($partido['aforo'] ?? '') ?> · <?= h($partido['precio_entrada'] ?? '0.00') ?></p></div><div class="card-actions"><a class="button button-secondary" href="<?= h(url_for('entradas', ['partido_id' => $partido['id']])) ?>">Entradas</a><a class="button button-quiet" href="<?= h(url_for('entradas/registro', ['partido_id' => $partido['id']])) ?>">Ver entradas compradas</a></div></article>
         <?php $estadisticasJugadores = $jugadoresPorPartido[$partido['id']] ?? []; ?>
         <details class="panel stats-panel"><summary>Registrar estadísticas por jugador</summary>
             <?php if (empty($estadisticasJugadores)): ?><p class="hint">Aún no hay jugadores registrados en los equipos de este partido.</p><?php else: ?>

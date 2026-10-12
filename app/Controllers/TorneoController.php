@@ -36,9 +36,18 @@ final class TorneoController
         if($errors){show_view('torneo_form',['title'=>'Crear torneo','currentRoute'=>'torneos','errors'=>$errors,'datos'=>$d]);return;}
         try{$this->torneos->crear($d);go_to('torneos');}catch(Throwable $e){error_log('GoolPass torneo: '.$e->getMessage());show_view('torneo_form',['title'=>'Crear torneo','currentRoute'=>'torneos','errors'=>['No se pudo crear el torneo.'],'datos'=>$d]);}
     }
+    public function toggleRegistration():void
+    {
+        need_login();check_csrf();$id=$this->id($_POST['torneo_id']??null);$torneo=$id?$this->torneos->buscarPorId($id):null;
+        if(!$torneo){go_to('torneos');return;}
+        $abiertas=(int)($torneo['inscripciones_abiertas']??1)===1;
+        try{$this->torneos->actualizarInscripcionesAbiertas($id,!$abiertas);go_to('torneos/ver',['id'=>$id]);}
+        catch(Throwable $e){error_log('GoolPass estado de inscripciones: '.$e->getMessage());$this->renderDetalle($torneo,['No se pudo actualizar el estado de las inscripciones.']);}
+    }
     public function enroll():void
     {
         need_login();check_csrf();$tid=$this->id($_POST['torneo_id']??null);$eid=$this->id($_POST['equipo_id']??null);$t=$tid?$this->torneos->buscarPorId($tid):null;$e=$eid?$this->equipos->buscarPorId($eid):null;$errors=[];
+        if($t&&(int)($t['inscripciones_abiertas']??1)!==1)$errors[]='Las inscripciones de este torneo están cerradas.';
         if(!$t)$errors[]='Selecciona un torneo existente.';elseif(strtolower((string)($t['estado']??''))!=='abierto')$errors[]='El torneo no está abierto para inscripciones.';
         if(!$e)$errors[]='Selecciona un equipo existente.';
         if($e&&$t&&!$this->eligible((string)$e['origen'],(string)$t['categoria']))$errors[]='El origen del equipo no es compatible con la categoría del torneo.';
@@ -51,7 +60,7 @@ final class TorneoController
         if(!$torneo){go_to('torneos');return;}
         $inscritos=$this->inscripciones->listarPorTorneo((int)$torneo['id']);$disponibles=[];
         foreach($this->equipos->listar() as $equipo){
-            if(!$this->inscripciones->listarPorEquipo((int)$equipo['id'])&&$this->eligible((string)$equipo['origen'],(string)$torneo['categoria']))$disponibles[]=$equipo;
+            if((int)($torneo['inscripciones_abiertas']??1)===1&&strtolower((string)($torneo['estado']??''))==='abierto'&&!$this->inscripciones->listarPorEquipo((int)$equipo['id'])&&$this->eligible((string)$equipo['origen'],(string)$torneo['categoria']))$disponibles[]=$equipo;
         }
         show_view('torneo_detalle',['title'=>$torneo['nombre'],'currentRoute'=>'torneos','torneo'=>$torneo,'equiposInscritos'=>$inscritos,'equiposDisponibles'=>$disponibles,'errors'=>$errors]);
     }

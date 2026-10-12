@@ -9,7 +9,11 @@ final class Schema
     {
         // La base actual ya no requiere ejecutar todos los CREATE TABLE en cada página.
         $version = (int)$conexion->query('PRAGMA user_version')->fetchColumn();
-        if ($version >= 3) return;
+        if ($version >= 4) return;
+        if ($version === 3) {
+            self::migrateInscriptionStatus($conexion);
+            return;
+        }
         $tablasExistentes = (int)$conexion->query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")->fetchColumn();
         if ($version === 0 && $tablasExistentes === 0) {
             self::crearEsquemaCanonico($conexion);
@@ -400,6 +404,16 @@ final class Schema
             BEGIN SELECT RAISE(ABORT, 'AFORO_COMPLETO'); END");
 
         $conexion->exec('PRAGMA user_version = 3');
+        self::migrateInscriptionStatus($conexion);
+    }
+
+    private static function migrateInscriptionStatus(PDO $conexion): void
+    {
+        $columns = array_column($conexion->query('PRAGMA table_info(torneos)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+        if (!in_array('inscripciones_abiertas', $columns, true)) {
+            $conexion->exec('ALTER TABLE torneos ADD COLUMN inscripciones_abiertas INTEGER NOT NULL DEFAULT 1 CHECK (inscripciones_abiertas IN (0,1))');
+        }
+        $conexion->exec('PRAGMA user_version = 4');
     }
 
     /** Crea desde cero la estructura limpia usada por instalaciones nuevas. */
@@ -413,7 +427,7 @@ final class Schema
         try {
             $versionActual = (int)$conexion->query('PRAGMA user_version')->fetchColumn();
             $tablasActuales = (int)$conexion->query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")->fetchColumn();
-            if ($versionActual >= 3) {
+            if ($versionActual >= 4) {
                 $conexion->exec('COMMIT');
                 return;
             }
@@ -454,6 +468,7 @@ CREATE TABLE IF NOT EXISTS torneos (
     categoria TEXT NOT NULL CHECK (categoria IN ('nacional','internacional')),
     formato TEXT NOT NULL DEFAULT '',
     estado TEXT NOT NULL DEFAULT 'abierto' CHECK (estado IN ('borrador','abierto','en_curso','finalizado','cancelado')),
+    inscripciones_abiertas INTEGER NOT NULL DEFAULT 1 CHECK (inscripciones_abiertas IN (0,1)),
     fecha_inicio TEXT,
     fecha_fin TEXT,
     creado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -569,7 +584,7 @@ WHEN NEW.estado_entrada<>'cancelada' AND NEW.estado_pago IN ('pendiente','pagado
      (SELECT aforo FROM partidos WHERE id=NEW.partido_id)
 BEGIN SELECT RAISE(ABORT,'AFORO_COMPLETO'); END;
 SQL);
-        $conexion->exec('PRAGMA user_version = 3');
+        $conexion->exec('PRAGMA user_version = 4');
             $conexion->exec('COMMIT');
         } catch (Throwable $error) {
             try { $conexion->exec('ROLLBACK'); } catch (Throwable) {}

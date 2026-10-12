@@ -40,7 +40,10 @@ final class EntradaController
     public function sales():void
     {
         need_login();
-        show_view('registro_entradas',['title'=>'Entradas registradas','currentRoute'=>'entradas','compras'=>$this->entradas->listarTodas()]);
+        $id=$this->id($_GET['partido_id']??null);$match=$id?$this->partidos->buscarPorId($id):null;
+        if($id&&!$match){http_response_code(404);show_view('registro_entradas',['title'=>'Entradas registradas','currentRoute'=>'entradas','partido'=>null,'compras'=>[],'errors'=>['No se encontró el partido.']]);return;}
+        $compras=$match?$this->entradas->listarPorPartido($id):$this->entradas->listarTodas();
+        show_view('registro_entradas',['title'=>$match?'Entradas del partido':'Entradas registradas','currentRoute'=>'entradas','partido'=>$match,'compras'=>$compras,'errors'=>[]]);
     }
     private function partidosDisponibles():array
     {
