@@ -58,4 +58,4 @@ La creación del esquema se verificó en una base temporal vacía y en `storage/
 
 ## Validación
 
-Se probó el recorrido de registro, creación de equipos y torneo, inscripción, creación de partido, compra e historial en una copia temporal de SQLite. La base de datos real no se modificó durante esa prueba.
+Se probó el recorrido de registro, creación de equipos y torneo, inscripción, creación de partido, compra e historial en una copia temporal de SQLite. La base de datos real no se modificó durante esa prueba.a
