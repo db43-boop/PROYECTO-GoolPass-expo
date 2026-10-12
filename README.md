@@ -17,13 +17,27 @@ Aplicación local para gestionar equipos, jugadores, torneos, inscripciones, par
 
 Apache redirige las solicitudes a `public/index.php`. Las rutas se despachan con el parámetro `r`, por ejemplo `index.php?r=torneos`; las vistas generan esos enlaces mediante `url_for()`.
 
+## Inicio de sesión y registro
+
+El acceso y la creación de cuenta son pantallas independientes. `http://localhost/PROYECTO-GoolPass-expo/public/index.php?r=login` muestra solo el formulario de inicio de sesión y enlaza al registro; `http://localhost/PROYECTO-GoolPass-expo/public/index.php?r=register` muestra solo el formulario para crear una cuenta y enlaza al inicio de sesión. Después de iniciar sesión o registrarse, la aplicación abre la gestión de equipos.
+
 ## Rutas del MVP
 
 - `login`, `register`, `logout`: autenticación y cierre de sesión.
-- `equipos`, `equipos/crear`, `equipos/ver`, `equipos/jugadores/crear`: equipos y plantilla.
-- `torneos`, `torneos/crear`, `torneos/inscribir`: torneos e inscripciones.
+- `equipos`, `equipos/crear`, `equipos/ver`, `equipos/jugadores/crear`: equipos y plantilla. `equipos/crear` abre el formulario.
+- `torneos`, `torneos/crear`, `torneos/ver`, `torneos/inscribir`: listado, creación, detalle e inscripciones por torneo.
 - `partidos`, `partidos/crear`, `partidos/estadisticas`: partidos manuales y estadísticas por jugador.
-- `entradas`, `entradas/comprar`: consulta de disponibilidad y compra de una entrada por envío.
+- `entradas`, `entradas/comprar`, `entradas/registro`: compra pública e historial privado (requiere iniciar sesión).
+
+## Flujo principal de uso
+
+1. Si ya tienes una cuenta, inicia sesión en la pantalla inicial. Si es tu primera vez, usa el enlace **Crear cuenta** para abrir el registro en su propia pantalla.
+2. En **Equipos**, usa **Crear equipo** y registra el origen nacional o internacional.
+3. En **Torneos**, crea un torneo e ingresa en él para inscribir equipos compatibles.
+4. Desde el detalle del torneo, pulsa **Generar partido**. El formulario ya queda asociado al torneo y solo ofrece sus equipos inscritos; se requieren al menos dos.
+5. En **Entradas**, cualquiera puede consultar partidos y registrar una compra como invitado o con cuenta. El historial completo aparece en **Entradas registradas** solo después de iniciar sesión.
+
+Sin iniciar sesión se puede acceder a las pantallas de autenticación y consultar o comprar entradas. Las páginas de gestión y el historial de ventas requieren una sesión activa; si un visitante intenta abrirlas, se le redirige al login.
 
 Las operaciones que cambian datos usan POST y token CSRF. Los controladores usan una conexión PDO compartida y no generan SQL en las vistas.
 
@@ -44,4 +58,4 @@ La creación del esquema se verificó en una base temporal vacía y en `storage/
 
 ## Validación
 
-La integración se validó con PHP/PDO SQLite de XAMPP; el esquema nuevo quedó vacío y las rutas MVP pasaron validación de sintaxis.
+Se probó el recorrido de registro, creación de equipos y torneo, inscripción, creación de partido, compra e historial en una copia temporal de SQLite. La base de datos real no se modificó durante esa prueba.

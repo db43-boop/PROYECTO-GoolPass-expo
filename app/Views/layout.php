@@ -1,6 +1,7 @@
 <?php
 $title = isset($title) ? $title : 'GoolPass';
 $currentRoute = isset($currentRoute) ? $currentRoute : '';
+$loggedIn = !empty($_SESSION['user']['id']);
 $assetBase = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/public/index.php'), '/\\');
 ?>
 <!doctype html>
@@ -13,14 +14,16 @@ $assetBase = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/public/index.php'), '/\\
 </head>
 <body>
 <header class="site-header">
-    <a class="brand" href="<?= h(url_for('equipos')) ?>">GoolPass</a>
+    <a class="brand" href="<?= h(url_for($loggedIn ? 'equipos' : 'login')) ?>">GoolPass</a>
     <nav aria-label="Navegación principal">
+        <?php if ($loggedIn): ?>
         <a class="<?= $currentRoute === 'equipos' ? 'is-active' : '' ?>" href="<?= h(url_for('equipos')) ?>">Equipos</a>
         <a class="<?= $currentRoute === 'torneos' ? 'is-active' : '' ?>" href="<?= h(url_for('torneos')) ?>">Torneos</a>
         <a class="<?= $currentRoute === 'partidos' ? 'is-active' : '' ?>" href="<?= h(url_for('partidos')) ?>">Partidos</a>
+        <?php endif; ?>
         <a class="<?= $currentRoute === 'entradas' ? 'is-active' : '' ?>" href="<?= h(url_for('entradas')) ?>">Entradas</a>
     </nav>
-    <?php if (!empty($_SESSION['user']['id'])): ?>
+    <?php if ($loggedIn): ?>
     <form method="post" action="<?= h(url_for('logout')) ?>" class="logout-form">
         <?= csrf_field() ?>
         <button class="button button-quiet" type="submit">Cerrar sesión</button>

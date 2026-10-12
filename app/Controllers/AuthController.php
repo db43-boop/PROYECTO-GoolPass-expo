@@ -16,6 +16,11 @@ final class AuthController
     }
     public function register(): void
     {
+        if (!empty($_SESSION['user']['id'])) go_to('equipos');
+        if (strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET') {
+            show_view('register', ['title'=>'Crear cuenta','errors'=>[],'old'=>[]]);
+            return;
+        }
         check_csrf();
         $name = trim((string)($_POST['nombre'] ?? ''));
         $email = mb_strtolower(trim((string)($_POST['email'] ?? '')));
@@ -25,13 +30,13 @@ final class AuthController
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 254) $errors[] = 'Ingresa un correo válido.';
         if (strlen($password) < 8) $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
         if (!$errors && $this->usuarios->buscarPorEmail($email)) $errors[] = 'Ese correo ya está registrado.';
-        if ($errors) { show_view('auth', ['errors' => $errors, 'old' => ['nombre' => $name, 'register_email' => $email]]); return; }
+        if ($errors) { show_view('register', ['title'=>'Crear cuenta','errors' => $errors, 'old' => ['nombre' => $name, 'register_email' => $email]]); return; }
         try {
             $id = $this->usuarios->crear($name, $email, password_hash($password, PASSWORD_DEFAULT));
             session_regenerate_id(true);
             $_SESSION['user'] = ['id' => $id, 'nombre' => $name, 'email' => $email];
             go_to('equipos');
-        } catch (Throwable $e) { error_log('GoolPass register: '.$e->getMessage()); show_view('auth', ['errors' => ['No se pudo completar el registro.'], 'old' => ['nombre' => $name, 'register_email' => $email]]); }
+        } catch (Throwable $e) { error_log('GoolPass register: '.$e->getMessage()); show_view('register', ['title'=>'Crear cuenta','errors' => ['No se pudo completar el registro.'], 'old' => ['nombre' => $name, 'register_email' => $email]]); }
     }
     public function logout(): void
     {

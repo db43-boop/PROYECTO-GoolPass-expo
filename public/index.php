@@ -35,7 +35,7 @@ if ($route === 'assets/app.css') {
 
 $controllerRoutes = [
     'login' => [AuthController::class, 'login', ['GET', 'POST']],
-    'register' => [AuthController::class, 'register', ['POST']],
+    'register' => [AuthController::class, 'register', ['GET', 'POST']],
     'logout' => [AuthController::class, 'logout', ['POST']],
     'equipos' => [EquipoController::class, 'index', ['GET']],
     'equipos/crear' => [EquipoController::class, 'create', ['GET', 'POST']],
