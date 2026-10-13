@@ -1,138 +1,180 @@
-# GoolPass MVC — proyecto completo con cuenta de administrador lista
+# GoolPass — Sistema de gestión de torneos de fútbol
 
-Esta versión **incluye** `storage/torneo.db`, a diferencia de los paquetes anteriores.
-El archivo está copiado del proyecto original aportado para la reestructuración.
-Incluye cuentas de prueba, ocho equipos, 88 jugadores, tres partidos y los escudos correspondientes.
+GoolPass es una aplicación web desarrollada en **PHP** con arquitectura **MVC (Modelo–Vista–Controlador)** y base de datos **SQLite**. Permite administrar equipos y jugadores, organizar torneos nacionales e internacionales, gestionar partidos y resultados y realizar compras simuladas de entradas.
 
-## Instalación limpia en XAMPP
+> **Entorno previsto:** demostración académica y pruebas locales. Los pagos de entradas son simulados y no representan cobros reales.
 
-1. Detén Apache desde XAMPP.
-2. **Respalda** la carpeta anterior y en especial su `storage/torneo.db` si has realizado registros nuevos.
-3. Renombra o mueve la carpeta antigua `C:\xampp\htdocs\GoolPass` a `GoolPass_anterior`. No mezcles carpetas antiguas.
-4. Extrae **la carpeta `GoolPass` que viene dentro de este ZIP** en `C:\xampp\htdocs\`. Debe quedar exactamente `C:\xampp\htdocs\GoolPass\public\index.php` y `C:\xampp\htdocs\GoolPass\storage\torneo.db`.
-5. Enciende Apache en XAMPP. No hace falta arrancar MySQL porque usa SQLite.
-6. Abre `http://localhost/GoolPass/public/index.php?r=login`.
+## 1. Requisitos
 
-## Cuentas de DEMOSTRACIÓN
+- Windows con XAMPP y Apache habilitado.
+- PHP 8.2 o compatible, con las extensiones **PDO** y **pdo_sqlite** activadas.
+- Navegador web actualizado.
+- Permisos de lectura y escritura en `storage/` y `public/uploads/`.
+- MySQL y phpMyAdmin **no son necesarios**: los datos se almacenan en SQLite.
 
-- **Admin:** `admin@goolpass.com` — contraseña `admin123`.
-- **Usuario:** `usuario@goolpass.com` — contraseña `12345678`.
+## 2. Estructura del proyecto
 
-No necesitas ejecutar `seed.php` para iniciar: `torneo.db` ya está incluido y preparado.
-Si seguías conectado con una cuenta de usuario, cierra sesión para entrar con el administrador.
+```text
+GoolPass/
+├── .htaccess
+├── .gitignore
+├── README.md
+├── seed.php
+├── app/
+│   ├── bootstrap.php
+│   ├── Schema.php
+│   ├── Config/
+│   │   ├── app.php
+│   │   └── database.php
+│   ├── Controllers/
+│   │   ├── AuthController.php
+│   │   ├── EntradaController.php
+│   │   ├── EquipoController.php
+│   │   ├── PartidoController.php
+│   │   └── TorneoController.php
+│   ├── Core/
+│   │   ├── Database.php
+│   │   └── View.php
+│   ├── Models/
+│   └── Views/
+├── public/
+│   ├── index.php
+│   ├── css/app.css
+│   └── uploads/
+└── storage/
+    └── torneo.db        # se crea/restaura en una instalación de demostración
+```
 
-## Base de datos y respaldos
+**Función de cada capa:**
 
-- `storage/torneo.db` ya tiene los registros. **Reemplazarla sobrescribe los datos locales anteriores**; guarda una copia si importan.
-- `seed.php` sirve para configurar/restaurar datos de demostración desde la terminal, pero **no es obligatorio** para esta versión.
-- Las credenciales son exclusivas para pruebas en un entorno local. Cámbialas antes de publicar el sistema en Internet. No subas la base de datos demo a un repositorio público.
+| Elemento | Responsabilidad |
+| --- | --- |
+| `public/index.php` | Punto de entrada y selección de controladores mediante `?r=`. |
+| `app/Controllers/` | Validación de solicitudes, autenticación y operaciones de cada módulo. |
+| `app/Models/` | Consultas SQL y operaciones sobre equipos, jugadores, partidos, torneos, entradas y usuarios. |
+| `app/Views/` | Generación del HTML y formularios de la aplicación. |
+| `app/Core/Database.php` | Conexión PDO a SQLite. |
+| `app/Config/database.php` | Configuración de la ubicación de `storage/torneo.db`. |
+| `app/Schema.php` | Creación y migración de tablas y relaciones. |
+| `app/bootstrap.php` | Inicialización de configuración, modelos, controladores y esquema. |
+| `seed.php` | Carga o recuperación de datos de demostración desde la terminal. |
+| `public/uploads/` | Archivos de escudos de los equipos. |
 
-## Notas técnicas
+## 3. Instalación local con XAMPP
 
-- Usa PHP con `pdo_sqlite` habilitado (por defecto en muchas instalaciones de XAMPP).
-- La carpeta `app` y `storage` están protegidas con `.htaccess`.
-- Si aparece `Forbidden` al entrar en la raíz, prueba la URL explícita `/GoolPass/public/index.php?r=login`.
+1. Copiar la carpeta completa del proyecto a `C:\xampp\htdocs\`.
+2. Verificar que la estructura contenga `public/index.php`, `app/bootstrap.php` y `storage/`.
+3. Iniciar **Apache** desde XAMPP. No es necesario iniciar MySQL.
+4. Acceder mediante la siguiente dirección, reemplazando `NOMBRE_CARPETA` por el nombre real de la carpeta del proyecto:
 
----
+   ```text
+   http://localhost/NOMBRE_CARPETA/public/index.php
+   ```
 
-# GoolPass — tu proyecto original reorganizado en MVC
+5. Para ingresar directamente a la pantalla de autenticación:
 
-**Origen:** `PROYECTO-GoolPass-mio.rar` entregado en esta conversación. No es una aplicación nueva.
-Se conservaron las pantallas originales (portada, login/registro, equipos, ficha, edición, gestión de jugadores, sorteos, partidos, compra simulada, mis entradas, usuarios, perfil) y la lógica de sus modelos.
+   ```text
+   http://localhost/NOMBRE_CARPETA/public/index.php?r=login
+   ```
 
-## Ejecutar en XAMPP
+**Importante:** `C:\xampp\htdocs\` es una ruta del disco, no parte de la URL. Una dirección como `http://localhost/C:/xampp/htdocs/...` es incorrecta.
 
-1. Extrae la carpeta `GoolPass_MVC_Misma_Funcionalidad` en `C:\xampp\htdocs\` sin sobrescribir tu proyecto anterior.
-2. Inicia Apache (MySQL NO es necesario, se utiliza SQLite).
-3. En la terminal, estando dentro de `GoolPass_MVC_Misma_Funcionalidad`, ejecuta `C:\xampp\php\php.exe seed.php` **una sola vez**.
-4. Visita `http://localhost/GoolPass_MVC_Misma_Funcionalidad/public/` o `http://localhost/GoolPass_MVC_Misma_Funcionalidad/public/index.php?r=login`.
+## 4. Base de datos SQLite
 
-El archivo `seed.php` restaura los mismos registros de la **base original** y ocho escudos originales, que no se incluyen como archivos separados en el ZIP para respetar exactamente el árbol solicitado. Los seis archivos de nombre hexadecimal en `public/uploads` son copias de muestra. El instalador **no sobrescribe** bases de datos existentes.
+La base de datos de la aplicación se ubica en `storage/torneo.db`. La conexión se realiza con PDO y SQLite; las definiciones de tablas se encuentran en `app/Schema.php`.
 
-## Cuentas del entorno local
+### Instalación con una base de demostración existente
 
-- Administrador: `admin@goolpass.com` / `admin123`
-- Usuario: `usuario@goolpass.com` / `12345678`
+Si `storage/torneo.db` ya contiene equipos, jugadores, partidos y usuarios de prueba, iniciar Apache y abrir la aplicación. No es necesario ejecutar el instalador de datos.
 
-Estas credenciales son únicamente de demostración. **No publiques esta base precargada ni `seed.php` sin retirar primero las cuentas ficticias y revisar los datos.**
+### Instalación sin datos de demostración
 
-## Correspondencias desde los archivos antiguos
-
-- `app/Controllers/pages/*.php` y `app/Controllers/actions/*.php` se trasladaron a los cinco `*Controller.php`.
-- `app/Database/Migrations/Schema.php` → `app/Schema.php`.
-- `app/Core/auth.php` → funciones de autenticación en `app/Controllers/AuthController.php`.
-- `app/Catalogs/catalogo_ligas.php` y `app/Services/escudos.php` → `app/Models/Equipo.php`.
-- `app/Services/formacion.php` → `app/Models/Jugador.php`.
-- Páginas antiguas → `app/Views/*.php`. Los formularios crear/editar comparten `equipo_form.php`.
-- Scripts originales de `public/js/` → incorporados en `app/Core/View.php` y emitidos en cada página.
-- CSS originales → fusionados en `public/css/app.css`.
-- `public/index.php` recibe las rutas `?r=crear`, `?r=ver`, `?r=ficha&id=1`, `?r=partidos`, `?r=torneo`, `?r=usuarios`, etc.
-- `registro_entradas.php` conserva el modal original de compra de entradas.
-- `torneo_form.php` y `torneo_detalle.php` separan las etapas originales del torneo.
-- Los dos modelos adicionales solicitados (`Inscripcion.php`, `EstadisticaPartido.php`) consultan las tablas originales. No inventan relaciones ni estructuras nuevas.
-
-## Nota de pruebas
-
-Se han comprobado la estructura, los archivos y la sintaxis PHP. Comprueba los flujos en tu XAMPP con `pdo_sqlite` habilitado: en este entorno de empaquetado PHP no tiene el driver `pdo_sqlite`, por lo que no se ha realizado una prueba completa HTTP/SQLite ni de la interfaz en navegador.
-
-
-## Cambio de estructura, no de funcionalidades
-
-La lógica y las vistas provienen del proyecto `PROYECTO-GoolPass-mio(1).rar`. Los archivos fueron agrupados bajo los nombres solicitados; las rutas de login, navegación y APIs ahora usan el controlador frontal `public/index.php`.
-
-**Aviso:** `seed.php` contiene la base de datos de demostración original comprimida; úsala solo en entornos de pruebas y no la publiques con datos personales.
-
-## Si no aparece el administrador
-
-Antes de ejecutar `seed.php`, haz una copia de seguridad de `storage/torneo.db` y cierra Apache en XAMPP.
+Si el archivo de base de datos no está presente o la base está vacía, ejecutar desde una terminal ubicada en la raíz del proyecto:
 
 ```powershell
 C:\xampp\php\php.exe seed.php
 ```
 
-- Si no existe la base, importa los datos originales: 8 equipos, 88 jugadores, 3 partidos y las cuentas demo.
-- Si existe una base completamente sin registros, primero crea un respaldo `torneo.db.backup_FECHA` y después importa los datos originales.
-- Si existen registros, los conserva y solamente añade la cuenta `admin@goolpass.com` cuando falta.
-- Si el admin existe pero su contraseña se cambió y quieres restablecerla **intencionalmente** a `admin123`, usa:
+**Precaución:** realizar un respaldo de `storage/torneo.db` antes de ejecutar tareas de restauración. `seed.php` está destinado a entornos de demostración; su comportamiento ante bases ya existentes debe revisarse antes de utilizarlo con información importante.
 
-```powershell
-C:\xampp\php\php.exe seed.php --restaurar-admin
-```
+### Respaldo
 
-Cuentas **solo para el entorno local**:
+1. Detener Apache para evitar escrituras durante el respaldo.
+2. Copiar `storage/torneo.db` a una ubicación segura.
+3. Conservar una copia anterior antes de sustituir el proyecto o la base de datos.
 
-- Admin: `admin@goolpass.com` / `admin123`
-- Usuario: `usuario@goolpass.com` / `12345678`
+## 5. Acceso de demostración
 
-**No publiques una base real ni sus contraseñas.**
+Las siguientes cuentas corresponden a los datos de prueba de la instalación académica, siempre que la base de datos utilizada las incluya:
 
+| Rol | Correo | Contraseña de prueba |
+| --- | --- | --- |
+| Administrador | `admin@goolpass.com` | `admin123` |
+| Usuario | `usuario@goolpass.com` | `12345678` |
 
-## Diseño adaptable (actualización de vistas)
+El administrador puede gestionar contenidos y operaciones del sistema; el usuario normal accede a las funciones de consulta y compra simulada que le correspondan.
 
-Se corrigió el tamaño del escudo en las tarjetas pequeñas de portada (`64×64`), que
-se había agrandado al fusionar varias hojas de estilo en `public/css/app.css`. Los
-escudos del listado de equipos ahora mantienen sus proporciones (`object-fit: contain`).
+**Seguridad:** estas credenciales son solo para localhost. No deben reutilizarse en servicios reales ni mantenerse en un sitio expuesto a Internet. La inclusión de `torneo.db` en Git debe evaluarse para evitar publicar información privada.
 
-En Equipos y Partidos el diseño utiliza hasta 4 columnas según el ancho disponible:
-4 en ventanas amplias (incluido zoom del 80 % en pantallas de escritorio habituales),
-3 en pantallas intermedias, 2 en tabletas y 1 en móviles. Mis Entradas y los grupos
-de Torneo tienen reglas equivalentes; las eliminatorias pueden desplazarse horizontalmente
-sin desbordar la pantalla. La navegación móvil permite desplazamiento horizontal.
+## 6. Funcionalidades principales
 
-El código PHP, las funciones MVC, `seed.php` y `storage/torneo.db` no se han cambiado.
-Se recomienda extraer en una carpeta nueva o respaldar `storage/torneo.db` antes
-de reemplazar el proyecto, pues el ZIP incluye la base de datos de demostración.
+- **Portada:** acceso a las secciones principales y visualización de información general.
+- **Equipos:** consulta, registro, edición y fichas de equipos y jugadores, según permisos.
+- **Torneos:** sorteos, grupos, eliminatorias y resultados nacionales e internacionales.
+- **Partidos:** programación, consulta de encuentros y actualización de resultados.
+- **Entradas:** compra simulada de entradas y consulta del importe pagado en **soles (S/)**.
+- **Autenticación:** acceso con perfiles de administrador y usuario.
 
+## 7. Escudos de prueba para una exposición
 
-## Dirección correcta en XAMPP (Windows)
+La carpeta adicional `escudos_prueba/` contiene doce escudos **ficticios** en formato PNG, de 512 × 512 píxeles, diseñados para demostrar la creación de equipos. No pertenecen a clubes reales.
 
-La URL depende de **cómo se llama la carpeta extraída bajo `C:\xampp\htdocs`**.
-Si la carpeta es `PROYECTO-GoolPass-mio2`, abre directamente:
+### Incorporación desde el formulario
 
-`http://localhost/PROYECTO-GoolPass-mio2/public/index.php`
+1. Iniciar sesión como administrador.
+2. Abrir la opción **Registrar equipo**.
+3. Ingresar los datos del nuevo equipo.
+4. En el campo **Escudo Oficial**, seleccionar un archivo PNG desde `escudos_prueba/`.
+5. Completar los campos obligatorios y guardar el equipo.
+6. Abrir la sección **Equipos** y comprobar que el escudo se muestra en la tarjeta y en la ficha.
 
-También funciona `http://localhost/PROYECTO-GoolPass-mio2/public/` si Apache permite DirectoryIndex index.php.
-El botón **Admin** de Apache en XAMPP abre el panel de localhost, no un enlace especial de GoolPass. Si desde ese panel un enlace genera `localhost/C:/xampp/htdocs/...`, no es una ruta válida de esta aplicación: usa la URL anterior y comprueba `DocumentRoot` de Apache si falla.
+El formulario admite extensiones `.jpg`, `.jpeg`, `.png` y `.webp`; los archivos de ejemplo están en PNG. La propia aplicación guarda las imágenes recibidas en `public/uploads/` cuando se realiza el registro.
 
-### Ajuste de vista
-En `public/css/app.css` la sección final `MIS ENTRADAS: ENCABEZADO CENTRADO` coloca el título y el subtítulo en el centro para administrador y usuario, con el botón debajo. No se han cambiado modelos, controladores ni registros SQLite.
+### Escudos incluidos
+
+`andes_fc.png`, `atlas_fc.png`, `bosque_fc.png`, `condor_fc.png`, `estrella_fc.png`, `halcon_fc.png`, `laguna_fc.png`, `real_fc.png`, `pantera_fc.png`, `titanes_fc.png`, `tiburones_fc.png` y `zorros_fc.png`.
+
+Los escudos son recursos de prueba. Agregar una imagen a una carpeta **no crea automáticamente** un equipo en SQLite: el registro debe realizarse desde la interfaz del sistema.
+
+## 8. Secuencia sugerida de demostración
+
+1. Iniciar sesión con una cuenta administradora de prueba.
+2. Registrar un equipo ficticio y adjuntar uno de los nuevos escudos.
+3. Verificar su tarjeta en **Equipos** y abrir su ficha.
+4. Agregar o consultar jugadores y revisar sus estadísticas.
+5. Configurar un torneo y mostrar grupos o eliminatorias.
+6. Consultar un partido y realizar una compra simulada de entrada.
+7. Comprobar **Mis entradas**, el código de acceso y el importe mostrado en `S/`.
+8. Ingresar con la cuenta de usuario para mostrar las diferencias de permisos.
+
+## 9. Resolución de problemas
+
+| Problema | Comprobación recomendada |
+| --- | --- |
+| **403 Forbidden** | Abrir `.../public/index.php` directamente y verificar `.htaccess`. |
+| **No conecta SQLite** | Revisar `pdo_sqlite`, la existencia de `storage/` y los permisos de escritura. |
+| **No aparece el administrador** | Verificar qué archivo `storage/torneo.db` está utilizando el proyecto y si contiene los registros demo. |
+| **No aparecen escudos** | Comprobar que `public/uploads/` tiene permisos de escritura y que el formulario guardó la imagen. |
+| **No cambian los estilos** | Recargar con `Ctrl + F5` para actualizar `public/css/app.css`. |
+| **URL con `C:/xampp/htdocs/`** | Utilizar `http://localhost/NOMBRE_CARPETA/public/`, sin la ruta física del disco. |
+
+## 10. Recomendaciones para el trabajo en GitHub
+
+- Mantener los cambios en una rama de desarrollo y solicitar revisión antes de integrarlos a `main`.
+- Revisar los archivos preparados con `git status` y `git diff --cached --stat` antes de crear el commit.
+- Evitar subir credenciales privadas y datos reales de usuarios o compras.
+- Si se decide compartir una base de demostración, utilizar datos ficticios y documentar que SQLite es un archivo binario que no se fusiona automáticamente entre ramas.
+
+---
+
+**GoolPass — documentación de instalación, arquitectura y pruebas del proyecto académico.**
