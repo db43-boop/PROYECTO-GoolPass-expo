@@ -1,5 +1,15 @@
 Options -Indexes
-# Archivos privados, bases de datos y scripts no deben descargarse.
-<FilesMatch "(?i)\.(?:db|sqlite|sqlite3|env|ini|log|bak|backup)$">
-    Require all denied
-</FilesMatch>
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Proteger carpetas internas
+    RewriteRule ^(?:app|storage)(?:/|$) - [F,L,NC]
+
+    # Proteger archivos internos
+    RewriteRule ^(?:seed\.php|estructura\.txt|README\.md|\.gitignore)$ - [F,L,NC]
+
+    # Redirigir automáticamente a public/
+    RewriteRule ^$ %{REQUEST_URI}public/ [R=302,L,NE]
+</IfModule>
